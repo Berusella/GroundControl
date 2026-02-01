@@ -24,21 +24,26 @@ var history_index: int = -1
 
 
 func _ready() -> void:
+	print("DEBUG: DebugConsole _ready() called")
 	panel.visible = false
 	input.text_submitted.connect(_on_command_submitted)
 
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_console"):
+		print("DEBUG: debug_console action pressed, toggling console")
 		_toggle_console()
 		get_viewport().set_input_as_handled()
 	elif is_visible and event is InputEventKey and event.pressed:
 		if event.keycode == KEY_UP:
 			_navigate_history(-1)
+			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_DOWN:
 			_navigate_history(1)
+			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_ESCAPE:
 			_toggle_console()
+			get_viewport().set_input_as_handled()
 
 
 func _toggle_console() -> void:
