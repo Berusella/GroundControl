@@ -12,7 +12,7 @@ var keys: int = 0
 var sprite: Sprite2D = null
 
 # Shooting
-var fire_rate: float = 0.2  # Seconds between shots
+var fire_rate: float = 5.0  # Shots per second
 var fire_cooldown: float = 0.0
 var shot_range: float = 1.5  # Projectile lifetime in seconds
 
@@ -93,7 +93,7 @@ func _handle_shooting(delta: float) -> void:
 	var shoot_direction = _get_shoot_direction()
 	if shoot_direction != Vector2.ZERO and fire_cooldown <= 0:
 		_shoot(shoot_direction)
-		fire_cooldown = fire_rate
+		fire_cooldown = 1.0 / fire_rate
 
 
 func _get_shoot_direction() -> Vector2:
