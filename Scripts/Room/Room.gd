@@ -5,11 +5,13 @@ class_name Room
 
 signal door_entered(direction: String)
 
-enum RoomType { NORMAL, BOSS, TREASURE }
+enum RoomType { NORMAL, BOSS, ITEM }
 
 const ENEMY_SCENES = {
 	"small_sapling": preload("res://Scenes/Enemies/SmallSapling.tscn")
 }
+
+const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
 
 var id: int = 0
 var room_type: RoomType = RoomType.NORMAL
@@ -21,6 +23,8 @@ var obstacles: Array = []
 var enemies_data: Dictionary = {}
 var enemies: Array[IEnemy] = []
 var is_cleared: bool = false
+var item_taken: bool = false
+var item_pedestal: Node2D = null
 
 @onready var door_north: Area2D = $Doors/DoorsNorth
 @onready var door_south: Area2D = $Doors/DoorsSouth
@@ -83,15 +87,22 @@ func load_from_dict(data: Dictionary) -> void:
 
 	var type_str = data.get("room_type", "Normal")
 	match type_str:
-		"Treasure":
-			room_type = RoomType.TREASURE
 		"Boss":
 			room_type = RoomType.BOSS
+		"Item":
+			room_type = RoomType.ITEM
 		_:
 			room_type = RoomType.NORMAL
 
+	# Track if item was taken (persisted in floor_grid)
+	item_taken = data.get("item_taken", false)
+
 	# Room is cleared if: already marked cleared, is starting room, or has no enemies
 	if data.get("is_cleared", false) or data.get("is_starting_room", false) or enemies_data.is_empty():
+		is_cleared = true
+
+	# ITEM rooms are always cleared (no enemies to fight)
+	if room_type == RoomType.ITEM:
 		is_cleared = true
 
 
@@ -120,6 +131,24 @@ func spawn_obstacles() -> void:
 		# Add obstacle spawning logic here
 
 
+func spawn_item_pedestal() -> void:
+	if room_type != RoomType.ITEM:
+		return
+
+	if item_taken:
+		return
+
+	item_pedestal = ITEM_PEDESTAL_SCENE.instantiate()
+	item_pedestal.position = player_spawn.position  # Center of room
+	item_pedestal.item_picked_up.connect(_on_item_picked_up)
+	add_child(item_pedestal)
+	item_pedestal.set_random_item()  # Call after adding to tree so @onready vars are set
+
+
+func _on_item_picked_up(_item_data: Dictionary) -> void:
+	item_taken = true
+
+
 func _on_enemy_died(enemy: IEnemy) -> void:
 	enemies.erase(enemy)
 	check_cleared()
@@ -129,11 +158,21 @@ func check_cleared() -> void:
 	if enemies.is_empty():
 		is_cleared = true
 		_open_doors()
+		_notify_player_room_cleared()
+
+
+func _notify_player_room_cleared() -> void:
+	var players = get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		var player = players[0]
+		if player.has_method("on_room_cleared"):
+			player.on_room_cleared()
 
 
 func _open_doors() -> void:
 	var doors = [door_north, door_south, door_east, door_west]
-	var open_texture = load("res://Sprites/Tiles/Forest/door_open.png")
+	var open_texture_path = ImageValidator.get_valid_path("res://Sprites/Tiles/Forest/door_open.png")
+	var open_texture = load(open_texture_path)
 
 	for door in doors:
 		if door.visible and door.has_node("Sprite2D"):

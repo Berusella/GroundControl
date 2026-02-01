@@ -3,10 +3,22 @@ extends ICharacter
 class_name Player
 
 
+signal item_picked_up(item_data: Dictionary)
+
 const SPRITE_PATH = "res://Sprites/Characters/Player/player.png"
 const DEFAULT_PROJECTILE = preload("res://Scenes/Projectiles/ProjectileStandard.tscn")
+const PROJECTILE_SCENES = {
+	"homing": preload("res://Scenes/Projectiles/ProjectileHoming.tscn"),
+	"bounce": preload("res://Scenes/Projectiles/ProjectileBounce.tscn"),
+	"laser": preload("res://Scenes/Projectiles/ProjectileLaser.tscn")
+}
 
 var projectile_scene: PackedScene = DEFAULT_PROJECTILE
+
+const SPECIAL_COOLDOWNS = {
+	"PEW PEW": 3, "BIG BOOM": 3, "ASCEND": 5, "INVERT": 2,
+	"MIND CONTROL": 5, "TIME STOP": 4, "SPEED SHOT": 6, "COPY": 3
+}
 
 var keys: int = 0
 var sprite: Sprite2D = null
@@ -20,6 +32,22 @@ var shot_range: float = 1.5  # Projectile lifetime in seconds
 var invincibility_duration: float = 1.0  # Seconds of i-frames after taking damage
 var invincibility_timer: float = 0.0
 var is_invincible: bool = false
+
+# Item system
+var collected_items: Array[Dictionary] = []
+var extra_lives: int = 0
+var current_special: String = ""
+var special_cooldown: int = 0  # Rooms until usable
+var special_max_cooldown: int = 0  # For UI progress display
+var projectile_modifiers: Array[String] = []
+
+# Active effects tracking
+var active_effects: Dictionary = {}  # {"effect_name": remaining_time}
+var is_flying: bool = false
+var is_copied: bool = false
+var original_fire_rate: float = 0.0
+var original_sprite_path: String = SPRITE_PATH
+var controlled_enemy: IEnemy = null
 
 
 func _ready() -> void:
@@ -62,6 +90,8 @@ func _physics_process(delta: float) -> void:
 	_handle_movement()
 	_handle_shooting(delta)
 	_handle_invincibility(delta)
+	_handle_special_input()
+	_process_active_effects(delta)
 
 
 func _handle_invincibility(delta: float) -> void:
@@ -75,6 +105,11 @@ func _handle_invincibility(delta: float) -> void:
 			invincibility_timer = 0.0
 			if sprite:
 				sprite.visible = true
+
+
+func _handle_special_input() -> void:
+	if Input.is_action_just_pressed("Special"):
+		use_special()
 
 
 func _handle_movement() -> void:
@@ -136,5 +171,322 @@ func heal(amount: int) -> void:
 
 
 func die() -> void:
+	if extra_lives > 0:
+		extra_lives -= 1
+		health = max_health
+		is_invincible = true
+		invincibility_timer = invincibility_duration * 2  # Extra i-frames on revive
+		print("Player revived! Extra lives remaining: %d" % extra_lives)
+		return
+
 	is_alive = false
 	queue_free()
+
+
+func apply_item(item_data: Dictionary) -> void:
+	collected_items.append(item_data)
+
+	var item_name = item_data.get("name", "Unknown")
+	print("Picked up: %s" % item_name)
+
+	item_picked_up.emit(item_data)
+
+	# Apply stat modifiers
+	var stats = item_data.get("stats")
+	if stats != null and stats is Dictionary:
+		_apply_stats(stats)
+
+	# Apply special ability
+	var special = item_data.get("special")
+	if special != null and special is String and not special.is_empty():
+		current_special = special
+		special_cooldown = 0  # Ready immediately
+		print("Gained special ability: %s" % special)
+
+	# Apply projectile modifier
+	var projectile = item_data.get("projectile")
+	if projectile != null and projectile is String and not projectile.is_empty():
+		_apply_projectile_modifier(projectile)
+
+	# Check if item charges special
+	if item_data.get("charges_special", false) and not current_special.is_empty():
+		if special_cooldown > 0:
+			special_cooldown = max(0, special_cooldown - 1)
+			print("Special cooldown reduced to: %d" % special_cooldown)
+
+
+func _apply_stats(stats: Dictionary) -> void:
+	if stats.has("hp"):
+		var hp_bonus = int(stats["hp"])
+		max_health += hp_bonus
+		health += hp_bonus
+		print("  +%d HP (now %d/%d)" % [hp_bonus, health, max_health])
+
+	if stats.has("power"):
+		var power_bonus = stats["power"]
+		power += int(power_bonus)
+		print("  +%s power (now %d)" % [str(power_bonus), power])
+
+	if stats.has("speed"):
+		var speed_bonus = stats["speed"]
+		speed += int(speed_bonus * 100)  # Speed is stored as pixels/sec, modifier is multiplier
+		print("  +%s speed (now %d)" % [str(speed_bonus), speed])
+
+	if stats.has("fire_rate"):
+		var fr_bonus = stats["fire_rate"]
+		fire_rate += fr_bonus
+		print("  +%s fire rate (now %.1f)" % [str(fr_bonus), fire_rate])
+
+	if stats.has("keys"):
+		var key_bonus = int(stats["keys"])
+		keys += key_bonus
+		print("  +%d keys (now %d)" % [key_bonus, keys])
+
+	if stats.has("extra_life"):
+		var life_bonus = int(stats["extra_life"])
+		extra_lives += life_bonus
+		print("  +%d extra life (now %d)" % [life_bonus, extra_lives])
+
+
+func _apply_projectile_modifier(modifier: String) -> void:
+	if modifier not in projectile_modifiers:
+		projectile_modifiers.append(modifier)
+		print("  Added projectile modifier: %s" % modifier)
+
+	# Update projectile scene to the most recent modifier
+	if modifier in PROJECTILE_SCENES:
+		projectile_scene = PROJECTILE_SCENES[modifier]
+		print("  Projectile type changed to: %s" % modifier)
+
+
+func use_special() -> void:
+	if current_special.is_empty():
+		return
+
+	if special_cooldown > 0:
+		print("Special not ready! %d rooms remaining" % special_cooldown)
+		return
+
+	# End COPY if active (using any special ends COPY)
+	if is_copied:
+		_end_copy()
+
+	print("Using special: %s" % current_special)
+	_perform_special(current_special)
+	special_max_cooldown = SPECIAL_COOLDOWNS.get(current_special, 3)
+	special_cooldown = special_max_cooldown
+
+
+func _perform_special(special_name: String) -> void:
+	match special_name:
+		"BIG BOOM":
+			_special_big_boom()
+		"PEW PEW":
+			_special_pew_pew()
+		"ASCEND":
+			_special_ascend()
+		"TIME STOP":
+			_special_time_stop()
+		"SPEED SHOT":
+			_special_speed_shot()
+		"MIND CONTROL":
+			_special_mind_control()
+		"COPY":
+			_special_copy()
+		"INVERT":
+			_special_invert()
+		_:
+			print("Unknown special ability: %s" % special_name)
+
+
+func _special_big_boom() -> void:
+	# Deal 2x player damage to enemies within radius around player
+	var boom_radius: float = 150.0
+	var boom_damage: int = power * 2
+
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	var hit_count: int = 0
+
+	for enemy in enemies:
+		var distance = global_position.distance_to(enemy.global_position)
+		if distance <= boom_radius:
+			if enemy.has_method("take_damage"):
+				enemy.take_damage(boom_damage)
+				hit_count += 1
+
+	print("BIG BOOM! Hit %d enemies for %d damage each" % [hit_count, boom_damage])
+
+
+func on_room_entered() -> void:
+	# Reset room-based effects
+	is_flying = false
+
+	# End all active timed effects
+	for effect_name in active_effects.keys():
+		_end_effect(effect_name)
+	active_effects.clear()
+
+	# End COPY on floor change (handled separately since it persists across rooms)
+	if is_copied:
+		_end_copy()
+
+
+func on_room_cleared() -> void:
+	# Called when all enemies in a room are defeated
+	if special_cooldown > 0:
+		special_cooldown -= 1
+		print("Special cooldown: %d rooms remaining" % special_cooldown)
+
+
+func _process_active_effects(delta: float) -> void:
+	var effects_to_end: Array[String] = []
+
+	for effect_name in active_effects:
+		active_effects[effect_name] -= delta
+		if active_effects[effect_name] <= 0:
+			effects_to_end.append(effect_name)
+
+	for effect_name in effects_to_end:
+		_end_effect(effect_name)
+		active_effects.erase(effect_name)
+
+
+func _end_effect(effect_name: String) -> void:
+	match effect_name:
+		"SPEED SHOT":
+			fire_rate = original_fire_rate
+			print("SPEED SHOT ended - fire rate restored to %.1f" % fire_rate)
+		"TIME STOP":
+			_unfreeze_all()
+			print("TIME STOP ended - enemies unfrozen")
+		"MIND CONTROL":
+			if controlled_enemy and is_instance_valid(controlled_enemy):
+				controlled_enemy.set_player_controlled(false)
+				controlled_enemy = null
+			print("MIND CONTROL ended")
+		"INVERT":
+			# TODO: Restore enemy movement types when implemented
+			print("INVERT ended")
+
+
+func _unfreeze_all() -> void:
+	# Unfreeze enemies
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		enemy.set_physics_process(true)
+
+	# Unfreeze enemy projectiles
+	var projectiles = get_tree().get_nodes_in_group("projectile")
+	for proj in projectiles:
+		if proj is IProjectile and proj.owner_node != self:
+			proj.set_physics_process(true)
+
+
+func _end_copy() -> void:
+	is_copied = false
+	if sprite:
+		sprite.texture = load(ImageValidator.get_valid_path(original_sprite_path))
+	print("COPY ended - sprite restored")
+
+
+func _special_pew_pew() -> void:
+	# Shoot a projectile at 1.5x damage
+	var shoot_direction = _get_shoot_direction()
+	if shoot_direction == Vector2.ZERO:
+		# Default to facing right if no direction input
+		shoot_direction = Vector2.RIGHT
+
+	var projectile = projectile_scene.instantiate()
+	var spawn_offset = shoot_direction * 20.0
+	projectile.global_position = global_position + spawn_offset
+	projectile.lifetime = shot_range
+	projectile.initialize(self, shoot_direction, velocity)
+	projectile.damage = int(power * 1.5)  # Override damage to 1.5x
+	get_tree().current_scene.add_child(projectile)
+	print("PEW PEW! Fired projectile with %d damage" % projectile.damage)
+
+
+func _special_ascend() -> void:
+	# Grant permanent +1 HP, +2 power and enable flight for the room
+	max_health += 1
+	health += 1
+	power += 2
+	is_flying = true
+	print("ASCEND! +1 HP (now %d/%d), +2 power (now %d), flight enabled" % [health, max_health, power])
+
+
+func _special_speed_shot() -> void:
+	# Set fire rate to 10 for 1 second
+	original_fire_rate = fire_rate
+	fire_rate = 10.0
+	active_effects["SPEED SHOT"] = 1.0
+	print("SPEED SHOT! Fire rate boosted to 10 for 1 second")
+
+
+func _special_time_stop() -> void:
+	# Freeze enemies and their projectiles for 10 seconds
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		enemy.set_physics_process(false)
+
+	var projectiles = get_tree().get_nodes_in_group("projectile")
+	for proj in projectiles:
+		if proj is IProjectile and proj.owner_node != self:
+			proj.set_physics_process(false)
+
+	active_effects["TIME STOP"] = 10.0
+	print("TIME STOP! Enemies and projectiles frozen for 10 seconds")
+
+
+func _special_mind_control() -> void:
+	# Control one enemy - mirrors player input
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	if enemies.is_empty():
+		print("MIND CONTROL failed - no enemies to control")
+		return
+
+	# Pick the nearest enemy
+	var nearest_enemy: IEnemy = null
+	var nearest_dist: float = INF
+
+	for enemy in enemies:
+		if enemy is IEnemy:
+			var dist = global_position.distance_to(enemy.global_position)
+			if dist < nearest_dist:
+				nearest_dist = dist
+				nearest_enemy = enemy
+
+	if nearest_enemy:
+		controlled_enemy = nearest_enemy
+		nearest_enemy.set_player_controlled(true)
+		# 5 seconds for regular enemies, could extend for bosses
+		active_effects["MIND CONTROL"] = 5.0
+		print("MIND CONTROL! Controlling enemy at distance %.1f" % nearest_dist)
+	else:
+		print("MIND CONTROL failed - no valid enemy found")
+
+
+func _special_copy() -> void:
+	# Transform into a random enemy until next special or floor change
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	if enemies.is_empty():
+		print("COPY failed - no enemies to copy")
+		return
+
+	# Pick a random enemy
+	var random_enemy = enemies[randi() % enemies.size()]
+
+	if random_enemy is IEnemy and random_enemy.sprite:
+		is_copied = true
+		if sprite and random_enemy.sprite.texture:
+			sprite.texture = random_enemy.sprite.texture
+			print("COPY! Transformed into enemy sprite")
+	else:
+		print("COPY failed - enemy has no sprite to copy")
+
+
+func _special_invert() -> void:
+	# TODO: Swap BRUTE↔ESCAPE enemy movement types
+	# This requires enemy movement types to be implemented first
+	active_effects["INVERT"] = 10.0
+	print("INVERT! Enemy movement types swapped for 10 seconds (not yet implemented)")

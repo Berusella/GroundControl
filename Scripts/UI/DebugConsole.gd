@@ -14,6 +14,24 @@ const PROJECTILE_SCENES = {
 	"laser": preload("res://Scenes/Projectiles/ProjectileLaser.tscn")
 }
 
+# Map console-friendly names to actual special ability names
+const SPECIAL_ABILITIES = {
+	"pew_pew": "PEW PEW",
+	"pewpew": "PEW PEW",
+	"big_boom": "BIG BOOM",
+	"bigboom": "BIG BOOM",
+	"boom": "BIG BOOM",
+	"ascend": "ASCEND",
+	"invert": "INVERT",
+	"mind_control": "MIND CONTROL",
+	"mindcontrol": "MIND CONTROL",
+	"time_stop": "TIME STOP",
+	"timestop": "TIME STOP",
+	"speed_shot": "SPEED SHOT",
+	"speedshot": "SPEED SHOT",
+	"copy": "COPY"
+}
+
 var is_visible: bool = false
 var command_history: Array[String] = []
 var history_index: int = -1
@@ -110,6 +128,10 @@ func _execute_command(command: String) -> void:
 			_cmd_range(args)
 		"firerate":
 			_cmd_firerate(args)
+		"tp":
+			_cmd_teleport(args)
+		"teleport":
+			_cmd_teleport(args)
 		_:
 			_log("Unknown command: " + cmd)
 			_log("Type 'help' for available commands")
@@ -177,8 +199,20 @@ func _cmd_change(args: String) -> void:
 				_log("Error: Player not found")
 
 		"special":
-			_log("Special abilities not yet implemented")
-			_log("Available will be: pew_pew, big_boom, ascend, invert, mind_control, time_stop, speed_shot, copy")
+			if type_name not in SPECIAL_ABILITIES:
+				_log("Unknown special: " + type_name)
+				_log("Available: " + ", ".join(SPECIAL_ABILITIES.keys()))
+				return
+
+			var player = _get_player()
+			if player:
+				var special_name = SPECIAL_ABILITIES[type_name]
+				player.current_special = special_name
+				player.special_cooldown = 0  # Ready immediately
+				player.special_max_cooldown = Player.SPECIAL_COOLDOWNS.get(special_name, 3)
+				_log("Set special to: " + special_name + " [READY]")
+			else:
+				_log("Error: Player not found")
 
 		_:
 			_log("Unknown category: " + category)
@@ -253,18 +287,51 @@ func _cmd_firerate(args: String) -> void:
 		_log("Usage: firerate [value] - Set shots per second")
 
 
+func _cmd_teleport(args: String) -> void:
+	var floor_manager = _get_floor_manager()
+	if not floor_manager:
+		_log("Error: FloorManager not found")
+		return
+
+	if args.is_empty():
+		_log("Usage: tp <room_type>")
+		_log("Types: item, boss")
+		return
+
+	var target_type = args.to_lower()
+	var target_pos = Vector2i(-1, -1)
+
+	for pos in floor_manager._floor_grid:
+		var room_data = floor_manager._floor_grid[pos]
+		var room_type = room_data.get("room_type", "Normal").to_lower()
+		if room_type == target_type:
+			target_pos = pos
+			break
+
+	if target_pos == Vector2i(-1, -1):
+		_log("No " + target_type + " room found on this floor")
+		return
+
+	# Load the room
+	floor_manager._load_room_at_position(target_pos, "")
+	_log("Teleported to " + target_type + " room at " + str(target_pos))
+
+
 func _cmd_help() -> void:
 	_log("=== Debug Console Commands ===")
 	_log("spawn enemy:<type> - Spawn enemy near player")
 	_log("  Types: " + ", ".join(ENEMY_SCENES.keys()))
 	_log("change projectile:<type> - Change player projectile")
 	_log("  Types: " + ", ".join(PROJECTILE_SCENES.keys()))
-	_log("change special:<type> - Change special ability (WIP)")
+	_log("change special:<type> - Set special ability (ready to use)")
+	_log("  Types: pew_pew, big_boom, ascend, invert,")
+	_log("         mind_control, time_stop, speed_shot, copy")
 	_log("heal [amount] - Heal player (default: 10)")
 	_log("kill all - Kill all enemies")
 	_log("god - Toggle invincibility")
 	_log("range [value] - Set/show projectile range (lifetime)")
 	_log("firerate [value] - Set/show fire rate (shots/sec)")
+	_log("tp <type> - Teleport to room (item, boss)")
 	_log("clear - Clear console")
 	_log("help - Show this help")
 
@@ -281,7 +348,18 @@ func _get_current_room() -> Room:
 	if rooms.size() > 0:
 		return rooms[0]
 	# Try to find via FloorManager
-	var floor_manager = get_tree().current_scene.get_node_or_null("FloorManager")
+	var floor_manager = _get_floor_manager()
 	if floor_manager:
 		return floor_manager._current_room
+	return null
+
+
+func _get_floor_manager() -> FloorManager:
+	var main = get_tree().current_scene
+	if main and main.has_method("get") and main.get("floor_manager"):
+		return main.floor_manager
+	# Try direct child lookup
+	for child in main.get_children():
+		if child is FloorManager:
+			return child
 	return null

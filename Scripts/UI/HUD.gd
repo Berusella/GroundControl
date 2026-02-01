@@ -3,10 +3,12 @@ extends CanvasLayer
 class_name HUD
 
 
-const SCRAP_FULL = preload("res://Sprites/UI/ui_heart_full.png")
-const SCRAP_EMPTY = preload("res://Sprites/UI/ui_heart_empty.png")
+const SCRAP_FULL_PATH = "res://Sprites/UI/ui_heart_full.png"
+const SCRAP_EMPTY_PATH = "res://Sprites/UI/ui_heart_empty.png"
 const SCRAP_SPACING = 20
 
+var scrap_full_texture: Texture2D
+var scrap_empty_texture: Texture2D
 var player: Player = null
 var scrap_icons: Array[TextureRect] = []
 
@@ -16,7 +18,13 @@ var scrap_icons: Array[TextureRect] = []
 
 
 func _ready() -> void:
+	_load_textures()
 	_find_player()
+
+
+func _load_textures() -> void:
+	scrap_full_texture = load(ImageValidator.get_valid_path(SCRAP_FULL_PATH))
+	scrap_empty_texture = load(ImageValidator.get_valid_path(SCRAP_EMPTY_PATH))
 
 
 func _process(_delta: float) -> void:
@@ -45,18 +53,26 @@ func _create_scrap_icons() -> void:
 	# Create icons for max health
 	for i in range(player.max_health):
 		var icon = TextureRect.new()
-		icon.texture = SCRAP_FULL
+		icon.texture = scrap_full_texture
 		icon.stretch_mode = TextureRect.STRETCH_KEEP
 		scrap_container.add_child(icon)
 		scrap_icons.append(icon)
 
 
 func _update_health() -> void:
+	# Add new icons if max health increased (from items)
+	while scrap_icons.size() < player.max_health:
+		var icon = TextureRect.new()
+		icon.texture = scrap_full_texture
+		icon.stretch_mode = TextureRect.STRETCH_KEEP
+		scrap_container.add_child(icon)
+		scrap_icons.append(icon)
+
 	for i in range(scrap_icons.size()):
 		if i < player.health:
-			scrap_icons[i].texture = SCRAP_FULL
+			scrap_icons[i].texture = scrap_full_texture
 		else:
-			scrap_icons[i].texture = SCRAP_EMPTY
+			scrap_icons[i].texture = scrap_empty_texture
 
 
 func _update_keys() -> void:
@@ -64,5 +80,12 @@ func _update_keys() -> void:
 
 
 func _update_special() -> void:
-	# TODO: Implement special ability cooldown display
-	special_label.text = "Ready"
+	if player.current_special.is_empty():
+		special_label.text = "None"
+		return
+
+	if player.special_cooldown > 0:
+		var progress = player.special_max_cooldown - player.special_cooldown
+		special_label.text = "%s (%d/%d)" % [player.current_special, progress, player.special_max_cooldown]
+	else:
+		special_label.text = "%s [READY]" % player.current_special
