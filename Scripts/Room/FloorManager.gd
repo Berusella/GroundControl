@@ -40,8 +40,9 @@ func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
 	if pos not in _floor_grid:
 		return null
 
-	# Clean up old room
+	# Clean up old room and save its cleared state
 	if _current_room:
+		_floor_grid[_current_position]["is_cleared"] = _current_room.is_cleared
 		_current_room.door_entered.disconnect(_on_door_entered)
 		_current_room.queue_free()
 

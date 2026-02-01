@@ -89,12 +89,15 @@ func load_from_dict(data: Dictionary) -> void:
 		_:
 			room_type = RoomType.NORMAL
 
-	# Starting room or rooms with no enemies are already cleared
-	if data.get("is_starting_room", false) or enemies_data.is_empty():
+	# Room is cleared if: already marked cleared, is starting room, or has no enemies
+	if data.get("is_cleared", false) or data.get("is_starting_room", false) or enemies_data.is_empty():
 		is_cleared = true
 
 
 func spawn_enemies() -> void:
+	if is_cleared:
+		return
+
 	var enemies_container = $Enemies
 
 	for enemy_type in enemies_data:
