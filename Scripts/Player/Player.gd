@@ -21,8 +21,8 @@ func _ready() -> void:
 
 
 func _setup_stats() -> void:
-	health = 100
-	max_health = 100
+	health = 10
+	max_health = 10
 	speed = 200
 	power = 3
 	is_alive = true
