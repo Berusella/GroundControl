@@ -13,6 +13,14 @@ var sprite_path: String = ""
 
 func _ready() -> void:
 	_setup_sprite()
+	_find_player()
+
+
+func _find_player() -> void:
+	# Find player in the scene tree
+	var players = get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		target = players[0]
 
 
 func _setup_sprite() -> void:

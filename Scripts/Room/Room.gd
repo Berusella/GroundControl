@@ -7,6 +7,10 @@ signal door_entered(direction: String)
 
 enum RoomType { NORMAL, BOSS, TREASURE }
 
+const ENEMY_SCENES = {
+	"small_sapling": preload("res://Scenes/Enemies/SmallSapling.tscn")
+}
+
 var id: int = 0
 var room_type: RoomType = RoomType.NORMAL
 var north: bool = false
@@ -39,17 +43,25 @@ func _setup_doors() -> void:
 func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
 	door.visible = is_active
 	door.monitoring = is_active
+	door.monitorable = is_active
 
-	if is_active:
-		# Add sprite if not already present
-		if not door.has_node("Sprite2D"):
-			var sprite = SpriteFactory.create("res://Sprites/Tiles/Forest/door_open.png")
-			door.add_child(sprite)
+	# Disable all collision shapes if door is inactive
+	for child in door.get_children():
+		if child is CollisionShape2D:
+			child.disabled = not is_active
 
-		# Connect signal
-		var callback = Callable(self, "_on_door_entered").bind(direction)
-		if not door.body_entered.is_connected(callback):
-			door.body_entered.connect(callback)
+	if not is_active:
+		return
+
+	# Add sprite if not already present
+	if not door.has_node("Sprite2D"):
+		var sprite = SpriteFactory.create("res://Sprites/Tiles/Forest/door_open.png")
+		door.add_child(sprite)
+
+	# Connect signal
+	var callback = Callable(self, "_on_door_entered").bind(direction)
+	if not door.body_entered.is_connected(callback):
+		door.body_entered.connect(callback)
 
 
 func _on_door_entered(body: Node2D, direction: String) -> void:
@@ -75,15 +87,36 @@ func load_from_dict(data: Dictionary) -> void:
 		_:
 			room_type = RoomType.NORMAL
 
+	# Starting room or rooms with no enemies are already cleared
+	if data.get("is_starting_room", false) or enemies_data.is_empty():
+		is_cleared = true
+
 
 func spawn_enemies() -> void:
-	pass
+	var enemies_container = $Enemies
+
+	for enemy_type in enemies_data:
+		if enemy_type not in ENEMY_SCENES:
+			continue
+
+		var positions = enemies_data[enemy_type]
+		for pos in positions:
+			var enemy = ENEMY_SCENES[enemy_type].instantiate()
+			enemy.position = Vector2(pos[0], pos[1])
+			enemies_container.add_child(enemy)
+			enemies.append(enemy)
+			enemy.tree_exited.connect(_on_enemy_died.bind(enemy))
 
 
 func spawn_obstacles() -> void:
 	for obs in obstacles:
 		var pos = Vector2(obs[0], obs[1])
 		# Add obstacle spawning logic here
+
+
+func _on_enemy_died(enemy: IEnemy) -> void:
+	enemies.erase(enemy)
+	check_cleared()
 
 
 func check_cleared() -> void:

@@ -3,66 +3,111 @@ extends Node
 class_name FloorManager
 
 
-signal room_changed(room: Room)
-
-var current_floor: int = 0
-var current_room: Room = null
-
 var _room_loader: RoomLoader = null
+var _floor_generator: FloorGenerator = null
 var _player: Player = null
+var _floor_grid: Dictionary = {}
+var _current_position: Vector2i = Vector2i.ZERO
+var _current_room: Room = null
+var _can_transition: bool = true
+const TRANSITION_COOLDOWN: float = 0.1  # 100ms
 
 
 func initialize(room_loader: RoomLoader, player: Player) -> void:
 	_room_loader = room_loader
 	_player = player
+	_floor_generator = FloorGenerator.new()
 
 
-func load_first_room() -> void:
-	if _room_loader == null or not _room_loader.has_rooms():
-		push_error("No rooms available")
-		return
-
-	var room_data = _room_loader.get_random_room_data()
-	_load_room(room_data, "")
+func generate_floor(room_count: int = 10) -> void:
+	_floor_grid = _floor_generator.generate_floor(room_count)
 
 
-func _load_room(room_data: Dictionary, entry_direction: String) -> void:
-	if room_data.is_empty():
-		return
+func load_starting_room() -> Room:
+	generate_floor()
 
-	_cleanup_current_room()
+	# Find the starting room
+	for pos in _floor_grid:
+		var room_data = _floor_grid[pos]
+		if room_data.get("is_starting_room", false):
+			_current_position = pos
+			return _load_room_at_position(pos)
 
-	current_room = _room_loader.create_room(room_data)
-	add_child(current_room)
-
-	current_room.door_entered.connect(_on_door_entered)
-
-	_position_player(entry_direction)
-
-	# Mark room as cleared for testing (remove when enemies work)
-	current_room.is_cleared = true
-
-	room_changed.emit(current_room)
+	return null
 
 
-func _cleanup_current_room() -> void:
-	if current_room == null:
-		return
+func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
+	if pos not in _floor_grid:
+		return null
 
-	if current_room.door_entered.is_connected(_on_door_entered):
-		current_room.door_entered.disconnect(_on_door_entered)
+	# Clean up old room
+	if _current_room:
+		_current_room.door_entered.disconnect(_on_door_entered)
+		_current_room.queue_free()
 
-	current_room.queue_free()
+	var room_data = _floor_grid[pos]
+	_current_room = _room_loader.create_room(room_data)
+	_current_position = pos
 
+	# Print room entry to console
+	var map_index = room_data.get("map_index", -1)
+	print("Entered Room %d at %s" % [map_index, pos])
 
-func _position_player(entry_direction: String) -> void:
-	if _player != null and current_room != null:
-		_player.position = current_room.get_spawn_position(entry_direction)
+	# Connect door signal
+	_current_room.door_entered.connect(_on_door_entered)
+
+	# Add room to scene
+	add_child(_current_room)
+
+	# Spawn enemies
+	_current_room.spawn_enemies()
+
+	# Position player
+	if _player:
+		_player.global_position = _current_room.get_spawn_position(from_direction)
+
+	return _current_room
 
 
 func _on_door_entered(direction: String) -> void:
-	var opposite = DirectionHelper.get_opposite(direction)
-	var next_room_data = _room_loader.get_room_data_with_door(opposite)
+	if not _can_transition:
+		return
 
-	if not next_room_data.is_empty():
-		_load_room(next_room_data, opposite)
+	var next_pos = _get_adjacent_position(direction)
+
+	if next_pos in _floor_grid:
+		_can_transition = false
+		var opposite_direction = _get_opposite_direction(direction)
+		_load_room_at_position(next_pos, opposite_direction)
+		_start_transition_cooldown()
+
+
+func _start_transition_cooldown() -> void:
+	await get_tree().create_timer(TRANSITION_COOLDOWN).timeout
+	_can_transition = true
+
+
+func _get_adjacent_position(direction: String) -> Vector2i:
+	match direction:
+		"north":
+			return _current_position + Vector2i.UP
+		"south":
+			return _current_position + Vector2i.DOWN
+		"east":
+			return _current_position + Vector2i.RIGHT
+		"west":
+			return _current_position + Vector2i.LEFT
+	return _current_position
+
+
+func _get_opposite_direction(direction: String) -> String:
+	match direction:
+		"north":
+			return "south"
+		"south":
+			return "north"
+		"east":
+			return "west"
+		"west":
+			return "east"
+	return ""

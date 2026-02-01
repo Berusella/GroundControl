@@ -127,7 +127,9 @@
 		"east": true,
 		"west": true,
 		"obstacles": [],
-		"enemies": {}
+		"enemies": {
+			"small_sapling": [[100, 50], [-100, 50], [0, -80]]
+		}
 	},
 	{
 		"id": 14,
@@ -137,7 +139,9 @@
 		"east": true,
 		"west": true,
 		"obstacles": [],
-		"enemies": {}
+		"enemies": {
+			"small_sapling": [[150, 0], [-150, 0]]
+		}
 	},
 	{
 		"id": 15,
@@ -210,6 +214,46 @@
 		"enemies": {}
 	},
 	{
+		"id": 27,
+		"room_type": "Normal",
+		"north": true,
+		"south": false,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 28,
+		"room_type": "Normal",
+		"north": true,
+		"south": false,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 29,
+		"room_type": "Normal",
+		"north": false,
+		"south": true,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 30,
+		"room_type": "Normal",
+		"north": false,
+		"south": true,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
 		"id": 22,
 		"room_type": "Treasure",
 		"north": true,
@@ -256,6 +300,36 @@
 		"south": true,
 		"east": false,
 		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 31,
+		"room_type": "Boss",
+		"north": true,
+		"south": false,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 32,
+		"room_type": "Boss",
+		"north": false,
+		"south": false,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 33,
+		"room_type": "Boss",
+		"north": false,
+		"south": false,
+		"east": false,
+		"west": true,
 		"obstacles": [],
 		"enemies": {}
 	}

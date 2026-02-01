@@ -15,6 +15,7 @@ var fire_cooldown: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("player")
 	_setup_stats()
 	_setup_sprite()
 
