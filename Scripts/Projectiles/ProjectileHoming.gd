@@ -35,7 +35,8 @@ func _physics_process(delta: float) -> void:
 		var target_dir = (target.global_position - global_position).normalized()
 		direction = direction.lerp(target_dir, turn_speed * delta).normalized()
 
-	position += direction * speed * delta
+	var movement = direction * speed + inherited_velocity
+	position += movement * delta
 
 
 func _on_detection_body_entered(body: Node2D) -> void:

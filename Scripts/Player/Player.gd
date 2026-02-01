@@ -112,7 +112,7 @@ func _shoot(direction: Vector2) -> void:
 	var spawn_offset = direction * 20.0
 	projectile.global_position = global_position + spawn_offset
 	projectile.lifetime = shot_range
-	projectile.initialize(self, direction)
+	projectile.initialize(self, direction, velocity)
 	get_tree().current_scene.add_child(projectile)
 
 

@@ -10,6 +10,8 @@ var owner_node: Node2D = null
 var sprite: Sprite2D = null
 var sprite_path: String = ""
 var lifetime: float = 5.0
+var inherited_velocity: Vector2 = Vector2.ZERO
+var momentum_retention: float = 0.5  # How much of shooter's velocity to keep
 var _lifetime_timer: SceneTreeTimer = null
 
 
@@ -41,12 +43,14 @@ func _on_lifetime_expired() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	position += direction * speed * delta
+	var movement = direction * speed + inherited_velocity
+	position += movement * delta
 
 
-func initialize(shooter: Node2D, dir: Vector2) -> void:
+func initialize(shooter: Node2D, dir: Vector2, shooter_velocity: Vector2 = Vector2.ZERO) -> void:
 	owner_node = shooter
 	direction = dir.normalized()
+	inherited_velocity = shooter_velocity * momentum_retention
 	if shooter is ICharacter:
 		damage = shooter.power
 
