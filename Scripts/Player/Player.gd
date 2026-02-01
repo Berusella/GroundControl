@@ -13,6 +13,11 @@ var sprite: Sprite2D = null
 var fire_rate: float = 0.2  # Seconds between shots
 var fire_cooldown: float = 0.0
 
+# Invincibility
+var invincibility_duration: float = 1.0  # Seconds of i-frames after taking damage
+var invincibility_timer: float = 0.0
+var is_invincible: bool = false
+
 
 func _ready() -> void:
 	add_to_group("player")
@@ -35,6 +40,20 @@ func _setup_sprite() -> void:
 func _physics_process(delta: float) -> void:
 	_handle_movement()
 	_handle_shooting(delta)
+	_handle_invincibility(delta)
+
+
+func _handle_invincibility(delta: float) -> void:
+	if is_invincible:
+		invincibility_timer -= delta
+		# Flash effect - toggle visibility
+		if sprite:
+			sprite.visible = int(invincibility_timer * 10) % 2 == 0
+		if invincibility_timer <= 0:
+			is_invincible = false
+			invincibility_timer = 0.0
+			if sprite:
+				sprite.visible = true
 
 
 func _handle_movement() -> void:
@@ -76,7 +95,13 @@ func _shoot(direction: Vector2) -> void:
 
 
 func take_damage(amount: int) -> void:
+	if is_invincible:
+		return
+
 	health -= amount
+	is_invincible = true
+	invincibility_timer = invincibility_duration
+
 	if health <= 0:
 		health = 0
 		die()
