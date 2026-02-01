@@ -106,6 +106,8 @@ func _execute_command(command: String) -> void:
 			_cmd_kill(args)
 		"god":
 			_cmd_god()
+		"range":
+			_cmd_range(args)
 		_:
 			_log("Unknown command: " + cmd)
 			_log("Type 'help' for available commands")
@@ -215,6 +217,23 @@ func _cmd_god() -> void:
 		_log("Error: Player not found")
 
 
+func _cmd_range(args: String) -> void:
+	var player = _get_player()
+	if not player:
+		_log("Error: Player not found")
+		return
+
+	if args.is_empty():
+		_log("Current range: " + str(player.shot_range))
+		return
+
+	if args.is_valid_float():
+		player.shot_range = float(args)
+		_log("Set range to: " + str(player.shot_range))
+	else:
+		_log("Usage: range [value] - Set projectile lifetime in seconds")
+
+
 func _cmd_help() -> void:
 	_log("=== Debug Console Commands ===")
 	_log("spawn enemy:<type> - Spawn enemy near player")
@@ -225,6 +244,7 @@ func _cmd_help() -> void:
 	_log("heal [amount] - Heal player (default: 10)")
 	_log("kill all - Kill all enemies")
 	_log("god - Toggle invincibility")
+	_log("range [value] - Set/show projectile range (lifetime)")
 	_log("clear - Clear console")
 	_log("help - Show this help")
 

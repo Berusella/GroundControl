@@ -14,6 +14,7 @@ var sprite: Sprite2D = null
 # Shooting
 var fire_rate: float = 0.2  # Seconds between shots
 var fire_cooldown: float = 0.0
+var shot_range: float = 1.5  # Projectile lifetime in seconds
 
 # Invincibility
 var invincibility_duration: float = 1.0  # Seconds of i-frames after taking damage
@@ -110,6 +111,7 @@ func _shoot(direction: Vector2) -> void:
 	var projectile = projectile_scene.instantiate()
 	var spawn_offset = direction * 20.0
 	projectile.global_position = global_position + spawn_offset
+	projectile.lifetime = shot_range
 	projectile.initialize(self, direction)
 	get_tree().current_scene.add_child(projectile)
 
