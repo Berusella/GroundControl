@@ -29,15 +29,15 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_QUOTELEFT:  # Backtick key
-			_toggle_console()
-			get_viewport().set_input_as_handled()
-		elif is_visible and event.keycode == KEY_UP:
+	if event.is_action_pressed("debug_console"):
+		_toggle_console()
+		get_viewport().set_input_as_handled()
+	elif is_visible and event is InputEventKey and event.pressed:
+		if event.keycode == KEY_UP:
 			_navigate_history(-1)
-		elif is_visible and event.keycode == KEY_DOWN:
+		elif event.keycode == KEY_DOWN:
 			_navigate_history(1)
-		elif is_visible and event.keycode == KEY_ESCAPE:
+		elif event.keycode == KEY_ESCAPE:
 			_toggle_console()
 
 
