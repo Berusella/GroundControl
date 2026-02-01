@@ -5,7 +5,7 @@ class_name ProjectileHoming
 
 var target: Node2D = null
 var turn_speed: float = 5.0
-var detection_range: float = 300.0
+var detection_range: float = 150.0
 
 
 func _init() -> void:
@@ -15,24 +15,29 @@ func _init() -> void:
 func _ready() -> void:
 	super._ready()
 	speed = 200.0
-	_find_nearest_target()
 
 
 func _physics_process(delta: float) -> void:
-	# Re-acquire target if lost
+	# Only search for target if we don't have one or lost it
 	if not target or not is_instance_valid(target):
+		target = null
 		_find_nearest_target()
 
+	# Only home if target is still within range
 	if target and is_instance_valid(target):
-		var target_dir = (target.global_position - global_position).normalized()
-		direction = direction.lerp(target_dir, turn_speed * delta).normalized()
+		var dist = global_position.distance_to(target.global_position)
+		if dist <= detection_range:
+			var target_dir = (target.global_position - global_position).normalized()
+			direction = direction.lerp(target_dir, turn_speed * delta).normalized()
+		else:
+			# Target moved out of range, stop tracking
+			target = null
 
 	position += direction * speed * delta
 
 
 func _find_nearest_target() -> void:
 	var nearest_dist = detection_range
-	target = null
 
 	# Find enemies if shot by player, find player if shot by enemy
 	if owner_node is Player:
@@ -47,7 +52,10 @@ func _find_nearest_target() -> void:
 	else:
 		var players = get_tree().get_nodes_in_group("player")
 		if players.size() > 0:
-			target = players[0]
+			var player = players[0]
+			var dist = global_position.distance_to(player.global_position)
+			if dist < detection_range:
+				target = player
 
 
 func set_target(t: Node2D) -> void:
