@@ -30,6 +30,7 @@ var is_cleared: bool = false
 
 
 func _ready() -> void:
+	add_to_group("room")
 	_setup_doors()
 
 

@@ -22,8 +22,8 @@ static func get_instance() -> GameManager:
 
 
 func change_pause_state() -> void:
-	is_paused != is_paused
-	get_tree().paused != get_tree().paused
+	is_paused = not is_paused
+	get_tree().paused = is_paused
 
 
 func change_room(room: Room) -> void:

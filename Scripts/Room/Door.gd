@@ -35,8 +35,8 @@ func unlock() -> void:
 
 func interact(player: Player) -> void:
 	if state == DoorState.LOCKED and requires_key:
-		if player.stats.keys > 0:
-			player.stats.keys -= 1
+		if player.keys > 0:
+			player.keys -= 1
 			unlock()
 			open()
 	elif state == DoorState.CLOSED:

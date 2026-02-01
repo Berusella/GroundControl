@@ -85,7 +85,8 @@ func _on_door_entered(direction: String) -> void:
 
 func _start_transition_cooldown() -> void:
 	await get_tree().create_timer(TRANSITION_COOLDOWN).timeout
-	_can_transition = true
+	if is_instance_valid(self):
+		_can_transition = true
 
 
 func _get_adjacent_position(direction: String) -> Vector2i:

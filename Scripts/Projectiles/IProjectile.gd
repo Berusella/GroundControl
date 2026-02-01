@@ -10,6 +10,7 @@ var owner_node: Node2D = null
 var sprite: Sprite2D = null
 var sprite_path: String = ""
 var lifetime: float = 5.0
+var _lifetime_timer: SceneTreeTimer = null
 
 
 func _ready() -> void:
@@ -18,18 +19,23 @@ func _ready() -> void:
 	_start_lifetime_timer()
 
 
+func _exit_tree() -> void:
+	if _lifetime_timer and _lifetime_timer.timeout.is_connected(_on_lifetime_expired):
+		_lifetime_timer.timeout.disconnect(_on_lifetime_expired)
+
+
 func _setup_sprite() -> void:
 	if not sprite_path.is_empty():
 		sprite = SpriteFactory.create_and_attach(self, sprite_path)
 
 
 func _start_lifetime_timer() -> void:
-	var timer = get_tree().create_timer(lifetime)
-	timer.timeout.connect(_on_lifetime_expired)
+	_lifetime_timer = get_tree().create_timer(lifetime)
+	_lifetime_timer.timeout.connect(_on_lifetime_expired)
 
 
 func _on_lifetime_expired() -> void:
-	if is_inside_tree():
+	if is_instance_valid(self) and is_inside_tree():
 		queue_free()
 
 
