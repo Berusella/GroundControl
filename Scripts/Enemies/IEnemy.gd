@@ -12,6 +12,7 @@ var sprite_path: String = ""
 
 
 func _ready() -> void:
+	add_to_group("enemy")
 	_setup_sprite()
 	_find_player()
 

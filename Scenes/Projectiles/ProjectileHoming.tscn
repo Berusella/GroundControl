@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://b8uygeqscsncl"]
+
+[ext_resource type="Script" path="res://Scripts/Projectiles/ProjectileHoming.gd" id="1_homing"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_proj"]
+radius = 8.0
+
+[node name="ProjectileHoming" type="Area2D"]
+z_index = 2
+collision_layer = 4
+collision_mask = 3
+monitoring = true
+monitorable = true
+script = ExtResource("1_homing")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_proj")

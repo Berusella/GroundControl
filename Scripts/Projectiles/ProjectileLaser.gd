@@ -18,8 +18,16 @@ func _ready() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if body == owner_node:
 		return
-	if body is ICharacter:
+
+	if body is IEnemy:
 		body.take_damage(damage)
 		pierce_count -= 1
 		if pierce_count <= 0:
 			queue_free()
+		# Otherwise continue through (piercing)
+	elif body is Player:
+		# Player hitbox handles damage
+		return
+	else:
+		# Hit wall - destroy
+		queue_free()
