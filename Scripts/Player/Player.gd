@@ -23,6 +23,24 @@ func _ready() -> void:
 	add_to_group("player")
 	_setup_stats()
 	_setup_sprite()
+	_setup_hitbox()
+
+
+func _setup_hitbox() -> void:
+	var hitbox = $Hitbox
+	hitbox.body_entered.connect(_on_hitbox_body_entered)
+	hitbox.area_entered.connect(_on_hitbox_area_entered)
+
+
+func _on_hitbox_body_entered(body: Node2D) -> void:
+	if body is IEnemy:
+		take_damage(body.power)
+
+
+func _on_hitbox_area_entered(area: Area2D) -> void:
+	if area is IProjectile and area.owner_node != self:
+		take_damage(area.damage)
+		area.queue_free()
 
 
 func _setup_stats() -> void:

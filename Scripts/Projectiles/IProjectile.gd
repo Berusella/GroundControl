@@ -47,6 +47,11 @@ func initialize(shooter: Node2D, dir: Vector2) -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if body == owner_node:
 		return
-	if body is ICharacter:
+	# Only deal damage to enemies, player hitbox handles player damage
+	if body is IEnemy:
 		body.take_damage(damage)
+	elif body is Player:
+		# Player hitbox handles damage, don't destroy here (hitbox will)
+		return
+	# Destroy on any non-player hit (enemies, walls, obstacles)
 	queue_free()

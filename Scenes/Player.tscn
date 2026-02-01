@@ -3,10 +3,22 @@
 [ext_resource type="Script" uid="uid://durdqo13m8y4l" path="res://Scripts/Player/Player.gd" id="1_kyqiw"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qbkls"]
+radius = 10.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
+radius = 12.0
 
 [node name="Player" type="CharacterBody2D" unique_id=351647391]
 z_index = 2
+collision_layer = 1
 script = ExtResource("1_kyqiw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1680165766]
 shape = SubResource("CircleShape2D_qbkls")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 6
+
+[node name="HitboxShape" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CircleShape2D_hitbox")
