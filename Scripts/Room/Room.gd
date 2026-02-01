@@ -55,7 +55,9 @@ func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
 
 	# Add sprite if not already present
 	if not door.has_node("Sprite2D"):
-		var sprite = SpriteFactory.create("res://Sprites/Tiles/Forest/door_open.png")
+		var door_texture = "res://Sprites/Tiles/Forest/door_open.png" if is_cleared else "res://Sprites/Tiles/Forest/door_closed.png"
+		var sprite = SpriteFactory.create(door_texture)
+		sprite.name = "Sprite2D"
 		door.add_child(sprite)
 
 	# Connect signal
@@ -122,6 +124,16 @@ func _on_enemy_died(enemy: IEnemy) -> void:
 func check_cleared() -> void:
 	if enemies.is_empty():
 		is_cleared = true
+		_open_doors()
+
+
+func _open_doors() -> void:
+	var doors = [door_north, door_south, door_east, door_west]
+	var open_texture = load("res://Sprites/Tiles/Forest/door_open.png")
+
+	for door in doors:
+		if door.visible and door.has_node("Sprite2D"):
+			door.get_node("Sprite2D").texture = open_texture
 
 
 func get_spawn_position(from_direction: String = "") -> Vector2:
