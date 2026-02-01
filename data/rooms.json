@@ -1,0 +1,262 @@
+[
+	{
+		"id": 1,
+		"room_type": "Normal",
+		"north": true,
+		"south": false,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 2,
+		"room_type": "Normal",
+		"north": true,
+		"south": false,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 3,
+		"room_type": "Normal",
+		"north": true,
+		"south": false,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 4,
+		"room_type": "Normal",
+		"north": false,
+		"south": true,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 5,
+		"room_type": "Normal",
+		"north": false,
+		"south": true,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 6,
+		"room_type": "Normal",
+		"north": false,
+		"south": true,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 7,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 8,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 9,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 10,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 11,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 12,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 13,
+		"room_type": "Normal",
+		"north": true,
+		"south": true,
+		"east": true,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 14,
+		"room_type": "Normal",
+		"north": true,
+		"south": true,
+		"east": true,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 15,
+		"room_type": "Normal",
+		"north": true,
+		"south": true,
+		"east": true,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 16,
+		"room_type": "Normal",
+		"north": true,
+		"south": true,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 17,
+		"room_type": "Normal",
+		"north": true,
+		"south": true,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 18,
+		"room_type": "Normal",
+		"north": true,
+		"south": false,
+		"east": true,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 19,
+		"room_type": "Normal",
+		"north": false,
+		"south": true,
+		"east": true,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 20,
+		"room_type": "Normal",
+		"north": true,
+		"south": true,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 21,
+		"room_type": "Normal",
+		"north": false,
+		"south": false,
+		"east": true,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 22,
+		"room_type": "Treasure",
+		"north": true,
+		"south": false,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 23,
+		"room_type": "Treasure",
+		"north": false,
+		"south": true,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 24,
+		"room_type": "Treasure",
+		"north": false,
+		"south": false,
+		"east": true,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 25,
+		"room_type": "Treasure",
+		"north": false,
+		"south": false,
+		"east": false,
+		"west": true,
+		"obstacles": [],
+		"enemies": {}
+	},
+	{
+		"id": 26,
+		"room_type": "Boss",
+		"north": false,
+		"south": true,
+		"east": false,
+		"west": false,
+		"obstacles": [],
+		"enemies": {}
+	}
+]

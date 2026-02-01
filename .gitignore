@@ -1,0 +1,20 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+*.translation
+
+# Imported textures and samples
+.import/
+
+# Editor settings
+*.cfg
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS-specific
+.DS_Store
+Thumbs.db
