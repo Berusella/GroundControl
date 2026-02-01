@@ -40,6 +40,9 @@ func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
 	if pos not in _floor_grid:
 		return null
 
+	# Clear all projectiles when transitioning
+	_clear_all_projectiles()
+
 	# Clean up old room and save its cleared state
 	if _current_room:
 		_floor_grid[_current_position]["is_cleared"] = _current_room.is_cleared
@@ -113,3 +116,9 @@ func _get_opposite_direction(direction: String) -> String:
 		"west":
 			return "east"
 	return ""
+
+
+func _clear_all_projectiles() -> void:
+	var projectiles = get_tree().get_nodes_in_group("projectile")
+	for projectile in projectiles:
+		projectile.queue_free()

@@ -14,6 +14,7 @@ var _lifetime_timer: SceneTreeTimer = null
 
 
 func _ready() -> void:
+	add_to_group("projectile")
 	body_entered.connect(_on_body_entered)
 	_setup_sprite()
 	_start_lifetime_timer()
