@@ -30,44 +30,31 @@ func _ready() -> void:
 
 
 func _setup_doors() -> void:
-	door_north.visible = north
-	door_south.visible = south
-	door_east.visible = east
-	door_west.visible = west
-
-	door_north.monitoring = north
-	door_south.monitoring = south
-	door_east.monitoring = east
-	door_west.monitoring = west
-
-	if north:
-		door_north.body_entered.connect(_on_door_north_entered)
-	if south:
-		door_south.body_entered.connect(_on_door_south_entered)
-	if east:
-		door_east.body_entered.connect(_on_door_east_entered)
-	if west:
-		door_west.body_entered.connect(_on_door_west_entered)
+	_setup_door(door_north, north, "north")
+	_setup_door(door_south, south, "south")
+	_setup_door(door_east, east, "east")
+	_setup_door(door_west, west, "west")
 
 
-func _on_door_north_entered(body: Node2D) -> void:
+func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
+	door.visible = is_active
+	door.monitoring = is_active
+
+	if is_active:
+		# Add sprite if not already present
+		if not door.has_node("Sprite2D"):
+			var sprite = SpriteFactory.create("res://Sprites/Tiles/Forest/door_open.png")
+			door.add_child(sprite)
+
+		# Connect signal
+		var callback = Callable(self, "_on_door_entered").bind(direction)
+		if not door.body_entered.is_connected(callback):
+			door.body_entered.connect(callback)
+
+
+func _on_door_entered(body: Node2D, direction: String) -> void:
 	if body is Player and is_cleared:
-		door_entered.emit("north")
-
-
-func _on_door_south_entered(body: Node2D) -> void:
-	if body is Player and is_cleared:
-		door_entered.emit("south")
-
-
-func _on_door_east_entered(body: Node2D) -> void:
-	if body is Player and is_cleared:
-		door_entered.emit("east")
-
-
-func _on_door_west_entered(body: Node2D) -> void:
-	if body is Player and is_cleared:
-		door_entered.emit("west")
+		door_entered.emit(direction)
 
 
 func load_from_dict(data: Dictionary) -> void:
@@ -104,5 +91,19 @@ func check_cleared() -> void:
 		is_cleared = true
 
 
-func get_spawn_position() -> Vector2:
+func get_spawn_position(from_direction: String = "") -> Vector2:
+	if from_direction.is_empty():
+		return player_spawn.global_position
+
+	# Spawn player at the door they entered from (offset into the room)
+	match from_direction:
+		"north":
+			return door_north.global_position + Vector2(0, 50)
+		"south":
+			return door_south.global_position + Vector2(0, -50)
+		"east":
+			return door_east.global_position + Vector2(-50, 0)
+		"west":
+			return door_west.global_position + Vector2(50, 0)
+
 	return player_spawn.global_position

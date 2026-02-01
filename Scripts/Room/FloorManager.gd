@@ -23,10 +23,10 @@ func load_first_room() -> void:
 		return
 
 	var room_data = _room_loader.get_random_room_data()
-	_load_room(room_data)
+	_load_room(room_data, "")
 
 
-func _load_room(room_data: Dictionary) -> void:
+func _load_room(room_data: Dictionary, entry_direction: String) -> void:
 	if room_data.is_empty():
 		return
 
@@ -37,7 +37,7 @@ func _load_room(room_data: Dictionary) -> void:
 
 	current_room.door_entered.connect(_on_door_entered)
 
-	_position_player()
+	_position_player(entry_direction)
 
 	# Mark room as cleared for testing (remove when enemies work)
 	current_room.is_cleared = true
@@ -55,9 +55,9 @@ func _cleanup_current_room() -> void:
 	current_room.queue_free()
 
 
-func _position_player() -> void:
+func _position_player(entry_direction: String) -> void:
 	if _player != null and current_room != null:
-		_player.position = current_room.get_spawn_position()
+		_player.position = current_room.get_spawn_position(entry_direction)
 
 
 func _on_door_entered(direction: String) -> void:
@@ -65,4 +65,4 @@ func _on_door_entered(direction: String) -> void:
 	var next_room_data = _room_loader.get_room_data_with_door(opposite)
 
 	if not next_room_data.is_empty():
-		_load_room(next_room_data)
+		_load_room(next_room_data, opposite)

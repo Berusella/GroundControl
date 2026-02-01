@@ -5,6 +5,7 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_qbkls"]
 
 [node name="Player" type="CharacterBody2D" unique_id=351647391]
+z_index = 2
 script = ExtResource("1_kyqiw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1680165766]
