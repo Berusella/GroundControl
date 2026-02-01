@@ -132,6 +132,11 @@ func _build_floor_grid() -> void:
 			_floor_grid[pos] = matching_room.duplicate()
 			_floor_grid[pos]["grid_position"] = pos
 			_floor_grid[pos]["map_index"] = map_index
+			# Add enemies to all normal rooms (temporary for testing)
+			if room_type == "Normal":
+				_floor_grid[pos]["enemies"] = {
+					"small_sapling": [[100, 50], [-100, 50]]
+				}
 			map_index += 1
 		else:
 			push_warning("No matching room found for position %s with doors %s and type %s" % [pos, doors, room_type])
