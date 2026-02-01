@@ -68,7 +68,8 @@ func _get_shoot_direction() -> Vector2:
 
 func _shoot(direction: Vector2) -> void:
 	var projectile = PROJECTILE_SCENE.instantiate()
-	projectile.global_position = global_position
+	var spawn_offset = direction * 20.0
+	projectile.global_position = global_position + spawn_offset
 	projectile.initialize(self, direction)
 	get_tree().current_scene.add_child(projectile)
 
