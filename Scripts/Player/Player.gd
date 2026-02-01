@@ -4,7 +4,9 @@ class_name Player
 
 
 const SPRITE_PATH = "res://Sprites/Characters/Player/player.png"
-const PROJECTILE_SCENE = preload("res://Scenes/Projectiles/ProjectileStandard.tscn")
+const DEFAULT_PROJECTILE = preload("res://Scenes/Projectiles/ProjectileStandard.tscn")
+
+var projectile_scene: PackedScene = DEFAULT_PROJECTILE
 
 var keys: int = 0
 var sprite: Sprite2D = null
@@ -105,7 +107,7 @@ func _get_shoot_direction() -> Vector2:
 
 
 func _shoot(direction: Vector2) -> void:
-	var projectile = PROJECTILE_SCENE.instantiate()
+	var projectile = projectile_scene.instantiate()
 	var spawn_offset = direction * 20.0
 	projectile.global_position = global_position + spawn_offset
 	projectile.initialize(self, direction)
