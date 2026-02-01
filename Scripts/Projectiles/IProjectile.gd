@@ -40,7 +40,7 @@ func _physics_process(delta: float) -> void:
 func initialize(shooter: Node2D, dir: Vector2) -> void:
 	owner_node = shooter
 	direction = dir.normalized()
-	if shooter is Player:
+	if shooter is ICharacter:
 		damage = shooter.power
 
 
