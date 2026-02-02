@@ -120,12 +120,16 @@ func _process_charging(delta: float) -> void:
 	if owner_node and is_instance_valid(owner_node):
 		global_position = owner_node.global_position + direction * 20.0
 
-	# Check if still shooting in same direction
+	# Check if still shooting (any direction counts, allows aiming while charging)
 	var shoot_dir = _get_shoot_direction()
-	if shoot_dir == Vector2.ZERO or shoot_dir.dot(direction) < 0.7:
-		# Released or changed direction - cancel
+	if shoot_dir == Vector2.ZERO:
+		# Released shoot - cancel
 		queue_free()
 		return
+
+	# Update direction to current aim while charging
+	direction = shoot_dir.normalized()
+	rotation = direction.angle()
 
 	# Update charge
 	charge_progress += delta
