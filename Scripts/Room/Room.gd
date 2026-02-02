@@ -24,6 +24,7 @@ const ENEMY_SCENES = {
 
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
 const NEXT_FLOOR_SCENE = preload("res://Scenes/Room/NextFloor.tscn")
+const OBSTACLE_SCENE = preload("res://Scenes/Room/Obstacle.tscn")
 
 # Door texture paths
 const DOOR_LOCKED_PATH = "res://Sprites/Tiles/Forest/door_locked.png"
@@ -215,7 +216,9 @@ func spawn_enemies() -> void:
 func spawn_obstacles() -> void:
 	for obs in obstacles:
 		var pos = Vector2(obs[0], obs[1])
-		# Add obstacle spawning logic here
+		var obstacle = OBSTACLE_SCENE.instantiate()
+		obstacle.position = pos
+		add_child(obstacle)
 
 
 func spawn_item_pedestal() -> void:
@@ -329,16 +332,48 @@ func _setup_navigation() -> void:
 	var min_y = -270.0 + margin
 	var max_y = 260.0 - margin
 
-	# Create outline for walkable area
-	var outline = PackedVector2Array([
+	# Outer boundary (clockwise winding)
+	var outer_outline = PackedVector2Array([
 		Vector2(min_x, min_y),
 		Vector2(max_x, min_y),
 		Vector2(max_x, max_y),
 		Vector2(min_x, max_y)
 	])
+	nav_poly.add_outline(outer_outline)
 
-	nav_poly.add_outline(outline)
-	nav_poly.make_polygons_from_outlines()
+	# Add holes for each obstacle (counter-clockwise winding)
+	var obstacle_margin = 20.0  # Extra margin around obstacles for pathfinding
+	var obstacle_half_size = 16.0 + obstacle_margin  # 32/2 + margin
+
+	for obs in obstacles:
+		var pos = Vector2(obs[0], obs[1])
+		# Counter-clockwise winding for holes
+		var hole = PackedVector2Array([
+			Vector2(pos.x - obstacle_half_size, pos.y - obstacle_half_size),
+			Vector2(pos.x - obstacle_half_size, pos.y + obstacle_half_size),
+			Vector2(pos.x + obstacle_half_size, pos.y + obstacle_half_size),
+			Vector2(pos.x + obstacle_half_size, pos.y - obstacle_half_size)
+		])
+		nav_poly.add_outline(hole)
+
+	# Bake the navigation mesh using NavigationServer2D
+	var source_geometry = NavigationMeshSourceGeometryData2D.new()
+
+	# Add traversable area (outer boundary)
+	source_geometry.add_traversable_outline(outer_outline)
+
+	# Add obstruction outlines for each obstacle
+	for obs in obstacles:
+		var pos = Vector2(obs[0], obs[1])
+		var obstruction = PackedVector2Array([
+			Vector2(pos.x - obstacle_half_size, pos.y - obstacle_half_size),
+			Vector2(pos.x + obstacle_half_size, pos.y - obstacle_half_size),
+			Vector2(pos.x + obstacle_half_size, pos.y + obstacle_half_size),
+			Vector2(pos.x - obstacle_half_size, pos.y + obstacle_half_size)
+		])
+		source_geometry.add_obstruction_outline(obstruction)
+
+	NavigationServer2D.bake_from_source_geometry_data(nav_poly, source_geometry)
 
 	nav_region.navigation_polygon = nav_poly
 	add_child(nav_region)
