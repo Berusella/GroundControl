@@ -31,6 +31,12 @@ func _init() -> void:
 func _ready() -> void:
 	super._ready()
 	add_to_group("laser_projectile")
+
+	# Check if another laser from this owner already exists - if so, self-destruct
+	if _has_existing_laser_from_owner():
+		queue_free()
+		return
+
 	_setup_raycast()
 	_setup_charge_indicator()
 
@@ -73,11 +79,6 @@ func initialize(shooter: Node2D, dir: Vector2, shooter_velocity: Vector2 = Vecto
 	direction = dir.normalized()
 	inherited_velocity = Vector2.ZERO  # Laser doesn't inherit velocity
 
-	# Check if another laser from this shooter already exists - if so, self-destruct
-	if _has_existing_laser_from_owner(shooter):
-		call_deferred("queue_free")
-		return
-
 	if shooter is ICharacter:
 		damage = shooter.power
 
@@ -96,10 +97,10 @@ func initialize(shooter: Node2D, dir: Vector2, shooter_velocity: Vector2 = Vecto
 	rotation = direction.angle()
 
 
-func _has_existing_laser_from_owner(shooter: Node2D) -> bool:
+func _has_existing_laser_from_owner() -> bool:
 	var lasers = get_tree().get_nodes_in_group("laser_projectile")
 	for laser in lasers:
-		if laser != self and laser.owner_node == shooter:
+		if laser != self and laser.owner_node == owner_node:
 			return true
 	return false
 
