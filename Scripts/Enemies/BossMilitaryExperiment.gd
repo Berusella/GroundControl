@@ -12,10 +12,10 @@ var fire_rate: float = 2.0
 var fire_cooldown: float = 0.0
 
 # Spawning brutelings
-var bruteling_timer: float = 0.0
-var bruteling_interval: float = 10.0
-var max_spawned: int = 5
-var spawned_count: int = 0
+var bruteling_timer: float = 5.0  # Initial delay before first spawn
+var bruteling_interval: float = 8.0
+var max_spawned_total: int = 5  # Total brutelings ever spawned (not concurrent)
+var total_spawned: int = 0
 
 
 func _init() -> void:
@@ -62,7 +62,7 @@ func _handle_spawning(delta: float) -> void:
 
 
 func _spawn_bruteling() -> void:
-	if spawned_count >= max_spawned:
+	if total_spawned >= max_spawned_total:
 		return
 
 	var bruteling = BRUTELING_SCENE.instantiate()
@@ -76,16 +76,10 @@ func _spawn_bruteling() -> void:
 		room.enemies.append(bruteling)
 		# Connect to room's enemy died handler so room clears properly
 		bruteling.tree_exited.connect(room._on_enemy_died.bind(bruteling))
-		bruteling.tree_exited.connect(_on_spawned_died)
 	else:
 		get_tree().current_scene.add_child(bruteling)
-		bruteling.tree_exited.connect(_on_spawned_died)
 
-	spawned_count += 1
-
-
-func _on_spawned_died() -> void:
-	spawned_count = max(0, spawned_count - 1)
+	total_spawned += 1
 
 
 func _get_current_room() -> Room:
