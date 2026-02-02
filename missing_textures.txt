@@ -1,0 +1,32 @@
+MISSING TEXTURES (25 total)
+
+=== Player (1) ===
+Sprites/Characters/Player/player.png
+
+=== Enemies/Bosses (3) ===
+Sprites/Characters/Enemies/boss_gorilla.png
+Sprites/Characters/Enemies/boss_military_experiment.png
+Sprites/Characters/Enemies/boss_vietnam_horror.png
+
+=== Items (21) ===
+Sprites/Items/its_time_to_stop.png
+Sprites/Items/the_carrier.png
+Sprites/Items/grenade.png
+Sprites/Items/overcharge.png
+Sprites/Items/steroids.png
+Sprites/Items/perfect_disguise.png
+Sprites/Items/healing_salve.png
+Sprites/Items/sezam.png
+Sprites/Items/brain_rot.png
+Sprites/Items/training_camp.png
+Sprites/Items/plasma_gun.png
+Sprites/Items/gattling_gun.png
+Sprites/Items/dual_wielding.png
+Sprites/Items/warship_turret.png
+Sprites/Items/super_reload_guy.png
+Sprites/Items/football.png
+Sprites/Items/government_budget.png
+Sprites/Items/the_spoon.png
+Sprites/Items/patched_hull.png
+Sprites/Items/pain_in_the_money.png
+Sprites/Items/know_where_it_is.png

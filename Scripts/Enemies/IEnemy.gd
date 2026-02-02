@@ -9,7 +9,9 @@ var attack_range: float = 50.0
 var detection_range: float = 200.0
 var sprite: Sprite2D = null
 var sprite_path: String = ""
+var sprite_scale: float = 1.5  # Default sprite scale, override in subclass
 var pathfinder: EnemyPathfinder = null
+var shot_range: float = 2.0  # Projectile lifetime in seconds (2x player default)
 
 # Spawn delay - enemies wait before attacking
 var spawn_delay: float = 1.5
@@ -18,6 +20,9 @@ var is_spawning: bool = true
 
 # Mind control support
 var is_player_controlled: bool = false
+
+# Invert support (for player INVERT special)
+var original_path_mode: int = -1  # Stores mode before invert, -1 = not inverted
 
 
 func _ready() -> void:
@@ -56,6 +61,8 @@ func _find_player() -> void:
 func _setup_sprite() -> void:
 	if not sprite_path.is_empty():
 		sprite = SpriteFactory.create_and_attach(self, sprite_path)
+		if sprite:
+			sprite.scale = Vector2(sprite_scale, sprite_scale)
 
 
 func attack() -> void:
@@ -97,6 +104,7 @@ func _shoot_at_target(projectile_scene: PackedScene, spawn_offset_distance: floa
 	var projectile = projectile_scene.instantiate()
 	var spawn_offset = direction * spawn_offset_distance
 	projectile.global_position = global_position + spawn_offset
+	projectile.lifetime = shot_range
 	projectile.initialize(self, direction)
 	get_tree().current_scene.add_child(projectile)
 
@@ -156,6 +164,36 @@ func set_player_controlled(controlled: bool) -> void:
 		# Restore normal AI movement
 		set_process(false)
 		set_physics_process(true)
+
+
+## Invert movement mode: BRUTE becomes ESCAPE, ESCAPE becomes BRUTE
+## Returns true if mode was swapped, false if enemy has no pathfinder or uses DASH/other
+func invert_movement() -> bool:
+	if not pathfinder:
+		return false
+
+	var current_mode = pathfinder.path_mode
+
+	# Only swap BRUTE and ESCAPE
+	if current_mode == EnemyPathfinder.PathMode.BRUTE:
+		original_path_mode = current_mode
+		pathfinder.set_mode(EnemyPathfinder.PathMode.ESCAPE)
+		return true
+	elif current_mode == EnemyPathfinder.PathMode.ESCAPE:
+		original_path_mode = current_mode
+		pathfinder.set_mode(EnemyPathfinder.PathMode.BRUTE)
+		return true
+
+	return false
+
+
+## Restore original movement mode after invert ends
+func restore_movement() -> void:
+	if not pathfinder or original_path_mode == -1:
+		return
+
+	pathfinder.set_mode(original_path_mode)
+	original_path_mode = -1
 
 
 func _process(delta: float) -> void:

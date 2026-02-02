@@ -384,8 +384,8 @@ func _end_effect(effect_name: String) -> void:
 				controlled_enemy = null
 			print("MIND CONTROL ended")
 		"INVERT":
-			# TODO: Restore enemy movement types when implemented
-			print("INVERT ended")
+			_restore_enemy_movements()
+			print("INVERT ended - enemy movements restored")
 
 
 func _unfreeze_all() -> void:
@@ -504,7 +504,21 @@ func _special_copy() -> void:
 
 
 func _special_invert() -> void:
-	# TODO: Swap BRUTE↔ESCAPE enemy movement types
-	# This requires enemy movement types to be implemented first
+	# Swap BRUTE↔ESCAPE enemy movement types
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	var inverted_count: int = 0
+
+	for enemy in enemies:
+		if enemy is IEnemy and enemy.has_method("invert_movement"):
+			if enemy.invert_movement():
+				inverted_count += 1
+
 	active_effects["INVERT"] = 10.0
-	print("INVERT! Enemy movement types swapped for 10 seconds (not yet implemented)")
+	print("INVERT! Swapped movement for %d enemies (10 seconds)" % inverted_count)
+
+
+func _restore_enemy_movements() -> void:
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if enemy is IEnemy and enemy.has_method("restore_movement"):
+			enemy.restore_movement()
