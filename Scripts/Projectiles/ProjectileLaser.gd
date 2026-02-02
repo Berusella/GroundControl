@@ -49,7 +49,7 @@ func _setup_raycast() -> void:
 	_raycast.enabled = true
 	_raycast.collide_with_bodies = true
 	_raycast.collide_with_areas = false
-	_raycast.collision_mask = 3  # Walls (1) and enemies (2)
+	_raycast.collision_mask = 1  # Walls only - beam passes through enemies
 	_raycast.hit_from_inside = false
 	_raycast.target_position = Vector2(beam_length, 0)  # Local space (node is rotated)
 	add_child(_raycast)
@@ -186,16 +186,42 @@ func _process_firing(delta: float) -> void:
 
 
 func _deal_beam_damage() -> void:
-	if not _raycast:
-		return
-
+	# Get beam end point (wall or max length)
 	_raycast.force_raycast_update()
-
+	var beam_end = global_position + direction * beam_length
 	if _raycast.is_colliding():
-		var collider = _raycast.get_collider()
-		if collider and collider != owner_node:
-			if collider is IEnemy and collider.has_method("take_damage"):
-				collider.take_damage(damage)
+		beam_end = _raycast.get_collision_point()
+
+	# Damage all enemies along the beam
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if enemy == owner_node or not is_instance_valid(enemy):
+			continue
+		if _is_point_on_beam(enemy.global_position, beam_end):
+			if enemy.has_method("take_damage"):
+				enemy.take_damage(damage)
+
+
+func _is_point_on_beam(point: Vector2, beam_end: Vector2) -> bool:
+	# Check if point is close enough to the beam line
+	var beam_start = global_position
+	var beam_vec = beam_end - beam_start
+	var beam_len = beam_vec.length()
+	if beam_len == 0:
+		return false
+
+	var to_point = point - beam_start
+	var projection = to_point.dot(beam_vec.normalized())
+
+	# Point must be between start and end
+	if projection < 0 or projection > beam_len:
+		return false
+
+	# Check perpendicular distance to beam
+	var closest_point = beam_start + beam_vec.normalized() * projection
+	var distance = point.distance_to(closest_point)
+
+	return distance < 20.0  # Hit radius
 
 
 func _update_beam_endpoint() -> void:
