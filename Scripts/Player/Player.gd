@@ -147,12 +147,21 @@ func _get_shoot_direction() -> Vector2:
 
 
 func _shoot(direction: Vector2) -> void:
-	var projectile = projectile_scene.instantiate()
-	var spawn_offset = direction * 20.0
-	projectile.global_position = global_position + spawn_offset
-	projectile.lifetime = shot_range
-	projectile.initialize(self, direction, velocity)
-	get_tree().current_scene.add_child(projectile)
+	var shot_count = 2 if "double" in projectile_modifiers else 1
+
+	for i in range(shot_count):
+		var projectile = projectile_scene.instantiate()
+		var spawn_offset = direction * 20.0
+
+		# Offset second shot slightly perpendicular to direction
+		if i == 1:
+			var perpendicular = Vector2(-direction.y, direction.x) * 10.0
+			spawn_offset += perpendicular
+
+		projectile.global_position = global_position + spawn_offset
+		projectile.lifetime = shot_range
+		projectile.initialize(self, direction, velocity)
+		get_tree().current_scene.add_child(projectile)
 
 
 func take_damage(amount: int) -> void:
@@ -252,10 +261,10 @@ func _apply_stats(stats: Dictionary) -> void:
 		keys += key_bonus
 		print("  +%d keys (now %d)" % [key_bonus, keys])
 
-	if stats.has("extra_life"):
-		var life_bonus = int(stats["extra_life"])
+	if stats.has("extra_lives"):
+		var life_bonus = int(stats["extra_lives"])
 		extra_lives += life_bonus
-		print("  +%d extra life (now %d)" % [life_bonus, extra_lives])
+		print("  +%d extra lives (now %d)" % [life_bonus, extra_lives])
 
 
 func _apply_projectile_modifier(modifier: String) -> void:

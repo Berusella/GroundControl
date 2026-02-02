@@ -1,11 +1,74 @@
 {
 	"items": [
 		{
+			"id": 0,
+			"name": "Tactical Supply",
+			"rarity": 1,
+			"special": null,
+			"stats": { "hp": 1, "keys": 1 },
+			"projectile": null,
+			"charges_special": true
+		},
+		{
+			"id": 1,
+			"name": "Live to See Another Day",
+			"rarity": 3,
+			"special": null,
+			"stats": { "extra_lives": 1 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 2,
+			"name": "Tactical Nuke",
+			"rarity": 4,
+			"special": "BIG BOOM",
+			"stats": { "power": 2 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 3,
+			"name": "Government Propaganda",
+			"rarity": 4,
+			"special": "MIND CONTROL",
+			"stats": { "hp": 2 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 4,
+			"name": "Its Time to Stop",
+			"rarity": 3,
+			"special": "TIME STOP",
+			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 5,
+			"name": "The Carrier",
+			"rarity": 4,
+			"special": "ASCEND",
+			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
 			"id": 6,
 			"name": "GRENADE",
 			"rarity": 2,
 			"special": "BIG BOOM",
 			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 7,
+			"name": "Overcharge",
+			"rarity": 3,
+			"special": "SPEED SHOT",
+			"stats": { "speed": 20 },
 			"projectile": null,
 			"charges_special": false
 		},
@@ -19,11 +82,92 @@
 			"charges_special": false
 		},
 		{
+			"id": 9,
+			"name": "PERFECT DISGUISE",
+			"rarity": 3,
+			"special": "COPY",
+			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
 			"id": 10,
-			"name": "Healing salve",
+			"name": "Healing Salve",
 			"rarity": 1,
 			"special": null,
 			"stats": { "hp": 1 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 11,
+			"name": "Sezam",
+			"rarity": 1,
+			"special": null,
+			"stats": { "keys": 3 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 12,
+			"name": "Brain Rot",
+			"rarity": 2,
+			"special": "INVERT",
+			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 13,
+			"name": "Training Camp",
+			"rarity": 3,
+			"special": "PEW PEW",
+			"stats": { "hp": 3, "power": 3, "speed": 40, "fire_rate": 2 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 14,
+			"name": "Plasma Gun",
+			"rarity": 3,
+			"special": null,
+			"stats": null,
+			"projectile": "laser",
+			"charges_special": false
+		},
+		{
+			"id": 15,
+			"name": "Gattling Gun",
+			"rarity": 4,
+			"special": "SPEED SHOT",
+			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 16,
+			"name": "Dual Wielding",
+			"rarity": 4,
+			"special": null,
+			"stats": { "power": -1, "fire_rate": -1 },
+			"projectile": "double",
+			"charges_special": false
+		},
+		{
+			"id": 17,
+			"name": "Warship Turret",
+			"rarity": 2,
+			"special": null,
+			"stats": { "fire_rate": 1 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 18,
+			"name": "Super Reload Guy",
+			"rarity": 3,
+			"special": null,
+			"stats": { "fire_rate": 4 },
 			"projectile": null,
 			"charges_special": false
 		},
@@ -37,6 +181,15 @@
 			"charges_special": false
 		},
 		{
+			"id": 20,
+			"name": "Government Budget",
+			"rarity": 2,
+			"special": null,
+			"stats": { "power": 2 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
 			"id": 21,
 			"name": "THE SPOON",
 			"rarity": 1,
@@ -46,8 +199,26 @@
 			"charges_special": false
 		},
 		{
+			"id": 22,
+			"name": "Patched Hull",
+			"rarity": 2,
+			"special": null,
+			"stats": { "hp": 2 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 23,
+			"name": "Pain in the $$$",
+			"rarity": 2,
+			"special": null,
+			"stats": { "speed": 80 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
 			"id": 24,
-			"name": "Know where it is",
+			"name": "Know Where It Is",
 			"rarity": 3,
 			"special": null,
 			"stats": null,
