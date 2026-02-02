@@ -7,6 +7,7 @@ const HUD_SCENE = preload("res://Scenes/UI/HUD.tscn")
 const DEBUG_CONSOLE_SCENE = preload("res://Scenes/UI/DebugConsole.tscn")
 const ITEM_POPUP_SCENE = preload("res://Scenes/UI/ItemPopup.tscn")
 const GAME_OVER_SCENE = preload("res://Scenes/UI/GameOver.tscn")
+const YOU_WIN_SCENE = preload("res://Scenes/UI/YouWin.tscn")
 const MAIN_MENU_SCENE = preload("res://Scenes/UI/MainMenu.tscn")
 const ROOMS_DATA_PATH = "res://data/rooms.json"
 
@@ -17,6 +18,7 @@ var hud: HUD = null
 var debug_console: DebugConsole = null
 var item_popup: ItemPopup = null
 var game_over: GameOver = null
+var you_win: YouWin = null
 var main_menu: MainMenu = null
 
 
@@ -49,6 +51,7 @@ func _start_game() -> void:
 	_create_debug_console()
 	_create_item_popup()
 	_create_game_over()
+	_create_you_win()
 
 
 func _setup_room_loader() -> void:
@@ -106,3 +109,15 @@ func _on_restart_pressed() -> void:
 
 func _on_exit_pressed() -> void:
 	get_tree().quit()
+
+
+func _create_you_win() -> void:
+	you_win = YOU_WIN_SCENE.instantiate()
+	add_child(you_win)
+	you_win.restart_pressed.connect(_on_restart_pressed)
+	you_win.exit_pressed.connect(_on_exit_pressed)
+	floor_manager.player_won.connect(_on_player_won)
+
+
+func _on_player_won() -> void:
+	you_win.show_you_win(player.collected_items)

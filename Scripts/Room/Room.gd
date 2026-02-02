@@ -270,8 +270,40 @@ func _notify_player_room_cleared() -> void:
 
 func _spawn_next_floor_portal() -> void:
 	var portal = NEXT_FLOOR_SCENE.instantiate()
-	portal.position = player_spawn.position  # Center of room
+	portal.position = _find_clear_spawn_position()
 	add_child(portal)
+
+
+func _find_clear_spawn_position() -> Vector2:
+	var default_pos = player_spawn.position
+	var obstacle_size = 48.0  # Obstacle (32) + margin (16)
+
+	# Check if default position is clear
+	if _is_position_clear(default_pos, obstacle_size):
+		return default_pos
+
+	# Try positions in expanding circles around center
+	var offsets = [
+		Vector2(64, 0), Vector2(-64, 0), Vector2(0, 64), Vector2(0, -64),
+		Vector2(64, 64), Vector2(-64, 64), Vector2(64, -64), Vector2(-64, -64),
+		Vector2(128, 0), Vector2(-128, 0), Vector2(0, 128), Vector2(0, -128)
+	]
+
+	for offset in offsets:
+		var test_pos = default_pos + offset
+		if _is_position_clear(test_pos, obstacle_size):
+			return test_pos
+
+	# Fallback to default if no clear position found
+	return default_pos
+
+
+func _is_position_clear(pos: Vector2, min_distance: float) -> bool:
+	for obs in obstacles:
+		var obs_pos = Vector2(obs[0], obs[1])
+		if pos.distance_to(obs_pos) < min_distance:
+			return false
+	return true
 
 
 func _try_spawn_pickup() -> void:

@@ -29,9 +29,9 @@ func _ready() -> void:
 
 
 func _setup_stats() -> void:
-	health = 350
-	max_health = 350
-	speed = 70  # 0.7 * 100 base
+	health = 200
+	max_health = 200
+	speed = 50  # 0.7 * 100 base
 	power = 2
 	is_alive = true
 
@@ -74,6 +74,8 @@ func _spawn_bruteling() -> void:
 	if room:
 		room.get_node("Enemies").add_child(bruteling)
 		room.enemies.append(bruteling)
+		# Connect to room's enemy died handler so room clears properly
+		bruteling.tree_exited.connect(room._on_enemy_died.bind(bruteling))
 		bruteling.tree_exited.connect(_on_spawned_died)
 	else:
 		get_tree().current_scene.add_child(bruteling)

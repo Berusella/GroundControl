@@ -315,20 +315,33 @@ func _cmd_teleport(args: String) -> void:
 
 	var target_type = args.to_lower()
 	var target_pos = Vector2i(-1, -1)
+	var room_data: Dictionary = {}
 
 	for pos in floor_manager._floor_grid:
-		var room_data = floor_manager._floor_grid[pos]
-		var room_type = room_data.get("room_type", "Normal").to_lower()
+		var data = floor_manager._floor_grid[pos]
+		var room_type = data.get("room_type", "Normal").to_lower()
 		if room_type == target_type:
 			target_pos = pos
+			room_data = data
 			break
 
 	if target_pos == Vector2i(-1, -1):
 		_log("No " + target_type + " room found on this floor")
 		return
 
-	# Load the room
-	floor_manager._load_room_at_position(target_pos, "")
+	# Find a valid door direction to spawn at
+	var spawn_direction = ""
+	if room_data.get("south", false):
+		spawn_direction = "north"  # Enter from south door
+	elif room_data.get("north", false):
+		spawn_direction = "south"  # Enter from north door
+	elif room_data.get("west", false):
+		spawn_direction = "east"   # Enter from west door
+	elif room_data.get("east", false):
+		spawn_direction = "west"   # Enter from east door
+
+	# Load the room with door spawn
+	floor_manager._load_room_at_position(target_pos, spawn_direction)
 	_log("Teleported to " + target_type + " room at " + str(target_pos))
 
 

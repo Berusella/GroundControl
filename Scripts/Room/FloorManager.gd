@@ -3,6 +3,8 @@ extends Node
 class_name FloorManager
 
 
+signal player_won
+
 var _room_loader: RoomLoader = null
 var _floor_generator: FloorGenerator = null
 var _player: Player = null
@@ -10,7 +12,9 @@ var _floor_grid: Dictionary = {}
 var _current_position: Vector2i = Vector2i.ZERO
 var _current_room: Room = null
 var _can_transition: bool = true
+var _current_floor: int = 1
 const TRANSITION_COOLDOWN: float = 0.1  # 100ms
+const MAX_FLOORS: int = 3
 
 
 func initialize(room_loader: RoomLoader, player: Player) -> void:
@@ -68,6 +72,9 @@ func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
 
 	# Add room to scene
 	add_child(_current_room)
+
+	# Spawn obstacles first (before enemies)
+	_current_room.spawn_obstacles()
 
 	# Spawn enemies
 	_current_room.spawn_enemies()
@@ -160,6 +167,11 @@ func _get_locked_doors(pos: Vector2i) -> Dictionary:
 
 
 func go_to_next_floor() -> void:
+	# Check if player has completed all floors
+	if _current_floor >= MAX_FLOORS:
+		player_won.emit()
+		return
+
 	# Clear current room
 	if _current_room and is_instance_valid(_current_room):
 		if _current_room.door_entered.is_connected(_on_door_entered):
@@ -169,7 +181,15 @@ func go_to_next_floor() -> void:
 
 	_clear_all_projectiles()
 
+	# Increment floor counter
+	_current_floor += 1
+	print("Entering Floor %d" % _current_floor)
+
 	# Generate new floor and load starting room
 	_floor_grid.clear()
 	_current_position = Vector2i.ZERO
 	load_starting_room()
+
+
+func get_current_floor() -> int:
+	return _current_floor

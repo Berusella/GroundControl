@@ -26,50 +26,117 @@ func _load_rooms_data() -> void:
 
 
 func generate_floor(room_count: int = 10) -> Dictionary:
-	_positions.clear()
+	var generation_attempts = 0
+	var max_generation_attempts = 10
 
-	var start_pos = Vector2i(_floor_size.x / 2, _floor_size.y / 2)
-	_positions.append(start_pos)
+	while generation_attempts < max_generation_attempts:
+		generation_attempts += 1
+		_positions.clear()
+		_floor_grid.clear()
 
-	var attempts = 0
-	# Reserve 2 spots for boss and item rooms
-	var main_room_count = room_count - 2
-	var max_attempts = room_count * 10
+		var start_pos = Vector2i(_floor_size.x / 2, _floor_size.y / 2)
+		_positions.append(start_pos)
 
-	while _positions.size() < main_room_count and attempts < max_attempts:
-		attempts += 1
+		var attempts = 0
+		# Reserve 2 spots for boss and item rooms
+		var main_room_count = room_count - 2
+		var max_attempts = room_count * 10
 
-		var expand_from = _positions.pick_random()
-		var direction = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT].pick_random()
-		var new_pos = expand_from + direction
+		while _positions.size() < main_room_count and attempts < max_attempts:
+			attempts += 1
 
-		if _is_valid(new_pos) and new_pos not in _positions:
-			_positions.append(new_pos)
+			var expand_from = _positions.pick_random()
+			var direction = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT].pick_random()
+			var new_pos = expand_from + direction
 
-	# Add boss and item rooms as guaranteed dead ends
-	_add_special_rooms()
+			if _is_valid(new_pos) and new_pos not in _positions:
+				_positions.append(new_pos)
 
-	_build_floor_grid()
-	_set_starting_room()
+		# Add boss and item rooms as guaranteed dead ends
+		_add_special_rooms()
+
+		_build_floor_grid()
+
+		# CRITICAL: Verify boss room was created successfully
+		if _verify_boss_room():
+			_set_starting_room()
+			_print_grid()
+			return _floor_grid
+		else:
+			push_warning("Floor generation attempt %d failed: Boss room not created. Retrying..." % generation_attempts)
+
+	# If all attempts failed, force a minimal valid floor
+	push_error("CRITICAL: All floor generation attempts failed! Creating emergency floor.")
+	_create_emergency_floor()
 	_print_grid()
 	return _floor_grid
+
+
+func _verify_boss_room() -> bool:
+	# Check that boss room exists in floor grid
+	if _boss_pos == Vector2i(-1, -1):
+		return false
+
+	if _boss_pos not in _floor_grid:
+		return false
+
+	var boss_room = _floor_grid[_boss_pos]
+	if boss_room.get("room_type", "") != "Boss":
+		return false
+
+	return true
+
+
+func _create_emergency_floor() -> void:
+	# Create a minimal floor with just start room and boss room
+	_positions.clear()
+	_floor_grid.clear()
+
+	var start_pos = Vector2i(_floor_size.x / 2, _floor_size.y / 2)
+	_boss_pos = start_pos + Vector2i.UP
+
+	_positions.append(start_pos)
+	_positions.append(_boss_pos)
+
+	# Build the minimal grid
+	var start_doors = {"north": true, "south": false, "east": false, "west": false}
+	var boss_doors = {"north": false, "south": true, "east": false, "west": false}
+
+	var start_room = _find_matching_room(start_doors, "Normal")
+	var boss_room = _find_matching_room(boss_doors, "Boss")
+
+	if start_room:
+		_floor_grid[start_pos] = start_room.duplicate()
+		_floor_grid[start_pos]["grid_position"] = start_pos
+		_floor_grid[start_pos]["map_index"] = 1
+		_floor_grid[start_pos]["is_starting_room"] = true
+
+	if boss_room:
+		_floor_grid[_boss_pos] = boss_room.duplicate()
+		_floor_grid[_boss_pos]["grid_position"] = _boss_pos
+		_floor_grid[_boss_pos]["map_index"] = 2
 
 
 func _add_special_rooms() -> void:
 	_boss_pos = Vector2i(-1, -1)
 	_item_pos = Vector2i(-1, -1)
 
-	# Find any valid adjacent position for boss room
-	_boss_pos = _find_any_adjacent_slot([], false)
+	# Boss room MUST be a dead-end (single door) to match boss room templates
+	_boss_pos = _find_dead_end_slot([])
 	if _boss_pos != Vector2i(-1, -1):
 		_positions.append(_boss_pos)
+	else:
+		# CRITICAL: Force create a boss room slot if none found
+		_boss_pos = _force_create_dead_end_slot([])
+		if _boss_pos != Vector2i(-1, -1):
+			_positions.append(_boss_pos)
 
 	# Find dead-end position for item room (single door only in templates)
 	var excluded: Array[Vector2i] = []
 	if _boss_pos != Vector2i(-1, -1):
 		excluded.append(_boss_pos)
 
-	_item_pos = _find_any_adjacent_slot(excluded, true)
+	_item_pos = _find_dead_end_slot(excluded)
 	if _item_pos != Vector2i(-1, -1):
 		_positions.append(_item_pos)
 
@@ -145,6 +212,57 @@ func _find_dead_end_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
 		return Vector2i(-1, -1)
 
 	return candidates.pick_random()
+
+
+func _force_create_dead_end_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
+	# Forcefully find ANY adjacent slot, prioritizing corners/edges of existing rooms
+	var directions = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+
+	# First try: find positions at the edge of the map (more likely to be dead-ends)
+	for pos in _positions:
+		if pos in excluded_positions:
+			continue
+
+		for dir in directions:
+			var candidate = pos + dir
+
+			if not _is_valid(candidate):
+				continue
+			if candidate in _positions:
+				continue
+			if candidate in excluded_positions:
+				continue
+
+			# Count neighbors - prefer positions with fewer neighbors
+			var neighbor_count = 0
+			for check_dir in directions:
+				var neighbor = candidate + check_dir
+				if neighbor in _positions:
+					neighbor_count += 1
+
+			# Accept positions with only 1 neighbor (ideal) or 2 if desperate
+			if neighbor_count <= 1:
+				return candidate
+
+	# Last resort: return any valid adjacent position
+	for pos in _positions:
+		if pos in excluded_positions:
+			continue
+
+		for dir in directions:
+			var candidate = pos + dir
+
+			if not _is_valid(candidate):
+				continue
+			if candidate in _positions:
+				continue
+			if candidate in excluded_positions:
+				continue
+
+			return candidate
+
+	push_error("CRITICAL: Could not find ANY slot for boss room!")
+	return Vector2i(-1, -1)
 
 
 func _set_starting_room() -> void:
