@@ -128,3 +128,18 @@ func _clear_all_projectiles() -> void:
 	var projectiles = get_tree().get_nodes_in_group("projectile")
 	for projectile in projectiles:
 		projectile.queue_free()
+
+
+func go_to_next_floor() -> void:
+	# Clear current room
+	if _current_room:
+		_current_room.door_entered.disconnect(_on_door_entered)
+		_current_room.queue_free()
+		_current_room = null
+
+	_clear_all_projectiles()
+
+	# Generate new floor and load starting room
+	_floor_grid.clear()
+	_current_position = Vector2i.ZERO
+	load_starting_room()

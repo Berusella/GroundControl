@@ -23,6 +23,7 @@ const ENEMY_SCENES = {
 }
 
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
+const NEXT_FLOOR_SCENE = preload("res://Scenes/Room/NextFloor.tscn")
 
 var id: int = 0
 var room_type: RoomType = RoomType.NORMAL
@@ -172,6 +173,10 @@ func check_cleared() -> void:
 		_open_doors()
 		_notify_player_room_cleared()
 
+		# Spawn next floor portal in boss rooms
+		if room_type == RoomType.BOSS:
+			_spawn_next_floor_portal()
+
 
 func _notify_player_room_cleared() -> void:
 	var players = get_tree().get_nodes_in_group("player")
@@ -179,6 +184,12 @@ func _notify_player_room_cleared() -> void:
 		var player = players[0]
 		if player.has_method("on_room_cleared"):
 			player.on_room_cleared()
+
+
+func _spawn_next_floor_portal() -> void:
+	var portal = NEXT_FLOOR_SCENE.instantiate()
+	portal.position = player_spawn.position  # Center of room
+	add_child(portal)
 
 
 func _open_doors() -> void:
