@@ -21,6 +21,7 @@ var _base_item_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
+	z_index = 3
 	_base_item_position = item_container.position
 	_setup_pedestal_sprite()
 
