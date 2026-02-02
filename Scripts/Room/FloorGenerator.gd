@@ -7,6 +7,8 @@ var _floor_size: Vector2i = Vector2i(7, 7)
 var _positions: Array[Vector2i] = []
 var _rooms_data: Array = []
 var _floor_grid: Dictionary = {}  # Vector2i -> room Dictionary
+var _boss_pos: Vector2i = Vector2i(-1, -1)
+var _item_pos: Vector2i = Vector2i(-1, -1)
 
 
 func _init() -> void:
@@ -54,22 +56,48 @@ func generate_floor(room_count: int = 10) -> Dictionary:
 
 
 func _add_special_rooms() -> void:
-	# Find boss room first (from original positions only)
-	var boss_pos = _find_dead_end_slot([])
-	if boss_pos != Vector2i(-1, -1):
-		_positions.append(boss_pos)
+	_boss_pos = Vector2i(-1, -1)
+	_item_pos = Vector2i(-1, -1)
 
-	# Find item room, excluding positions adjacent to boss room
+	# Find any valid adjacent position for boss room
+	_boss_pos = _find_any_adjacent_slot([])
+	if _boss_pos != Vector2i(-1, -1):
+		_positions.append(_boss_pos)
+
+	# Find any valid adjacent position for item room (excluding boss)
 	var excluded: Array[Vector2i] = []
-	if boss_pos != Vector2i(-1, -1):
-		excluded.append(boss_pos)
-		# Also exclude positions that would only connect to boss room
-		for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
-			excluded.append(boss_pos + dir)
+	if _boss_pos != Vector2i(-1, -1):
+		excluded.append(_boss_pos)
 
-	var item_pos = _find_dead_end_slot(excluded)
-	if item_pos != Vector2i(-1, -1):
-		_positions.append(item_pos)
+	_item_pos = _find_any_adjacent_slot(excluded)
+	if _item_pos != Vector2i(-1, -1):
+		_positions.append(_item_pos)
+
+
+func _find_any_adjacent_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
+	var candidates: Array[Vector2i] = []
+	var directions = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+
+	for pos in _positions:
+		if pos in excluded_positions:
+			continue
+
+		for dir in directions:
+			var candidate = pos + dir
+
+			if not _is_valid(candidate):
+				continue
+			if candidate in _positions:
+				continue
+			if candidate in excluded_positions:
+				continue
+
+			candidates.append(candidate)
+
+	if candidates.is_empty():
+		return Vector2i(-1, -1)
+
+	return candidates.pick_random()
 
 
 func _find_dead_end_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
@@ -128,18 +156,14 @@ func _set_starting_room() -> void:
 func _build_floor_grid() -> void:
 	_floor_grid.clear()
 
-	# Last two positions are boss and item rooms
-	var boss_pos = _positions[-2] if _positions.size() >= 2 else Vector2i(-1, -1)
-	var item_pos = _positions[-1] if _positions.size() >= 1 else Vector2i(-1, -1)
-
 	var map_index = 1
 	for pos in _positions:
 		var doors = _get_doors_for_position(pos)
 		var room_type = "Normal"
 
-		if pos == boss_pos:
+		if pos == _boss_pos:
 			room_type = "Boss"
-		elif pos == item_pos:
+		elif pos == _item_pos:
 			room_type = "Item"
 
 		var matching_room = _find_matching_room(doors, room_type)
