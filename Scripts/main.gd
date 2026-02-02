@@ -9,6 +9,7 @@ const ITEM_POPUP_SCENE = preload("res://Scenes/UI/ItemPopup.tscn")
 const GAME_OVER_SCENE = preload("res://Scenes/UI/GameOver.tscn")
 const YOU_WIN_SCENE = preload("res://Scenes/UI/YouWin.tscn")
 const MAIN_MENU_SCENE = preload("res://Scenes/UI/MainMenu.tscn")
+const MINIMAP_SCENE = preload("res://Scenes/UI/Minimap.tscn")
 const ROOMS_DATA_PATH = "res://data/rooms.json"
 
 var player: Player = null
@@ -20,6 +21,7 @@ var item_popup: ItemPopup = null
 var game_over: GameOver = null
 var you_win: YouWin = null
 var main_menu: MainMenu = null
+var minimap: Minimap = null
 
 
 func _ready() -> void:
@@ -48,6 +50,7 @@ func _start_game() -> void:
 	_create_player()
 	_setup_floor_manager()
 	_create_hud()
+	_create_minimap()
 	_create_debug_console()
 	_create_item_popup()
 	_create_game_over()
@@ -74,6 +77,18 @@ func _setup_floor_manager() -> void:
 func _create_hud() -> void:
 	hud = HUD_SCENE.instantiate()
 	add_child(hud)
+
+
+func _create_minimap() -> void:
+	minimap = MINIMAP_SCENE.instantiate()
+	add_child(minimap)
+	minimap.set_floor_manager(floor_manager)
+	floor_manager.floor_changed.connect(_on_floor_changed)
+
+
+func _on_floor_changed() -> void:
+	if minimap:
+		minimap.on_floor_changed()
 
 
 func _create_debug_console() -> void:

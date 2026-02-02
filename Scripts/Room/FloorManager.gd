@@ -4,6 +4,7 @@ class_name FloorManager
 
 
 signal player_won
+signal floor_changed
 
 var _room_loader: RoomLoader = null
 var _floor_generator: FloorGenerator = null
@@ -171,6 +172,7 @@ func go_to_next_floor() -> void:
 	_floor_grid.clear()
 	_current_position = Vector2i.ZERO
 	load_starting_room()
+	floor_changed.emit()
 
 
 func get_current_floor() -> int:
