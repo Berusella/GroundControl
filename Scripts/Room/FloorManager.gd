@@ -43,9 +43,10 @@ func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
 	# Clear all projectiles when transitioning
 	_clear_all_projectiles()
 
-	# Clean up old room and save its cleared state
+	# Clean up old room and save its state
 	if _current_room:
 		_floor_grid[_current_position]["is_cleared"] = _current_room.is_cleared
+		_floor_grid[_current_position]["item_taken"] = _current_room.item_taken
 		_current_room.door_entered.disconnect(_on_door_entered)
 		_current_room.queue_free()
 
@@ -66,9 +67,13 @@ func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
 	# Spawn enemies
 	_current_room.spawn_enemies()
 
-	# Position player
+	# Spawn item pedestal if this is an item room
+	_current_room.spawn_item_pedestal()
+
+	# Position player and notify of room entry
 	if _player:
 		_player.global_position = _current_room.get_spawn_position(from_direction)
+		_player.on_room_entered()
 
 	return _current_room
 
@@ -82,7 +87,8 @@ func _on_door_entered(direction: String) -> void:
 	if next_pos in _floor_grid:
 		_can_transition = false
 		var opposite_direction = _get_opposite_direction(direction)
-		_load_room_at_position(next_pos, opposite_direction)
+		# Defer room loading to avoid physics flush error
+		call_deferred("_load_room_at_position", next_pos, opposite_direction)
 		_start_transition_cooldown()
 
 

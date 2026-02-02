@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://ctffco700qolp"]
+
+[ext_resource type="Script" uid="uid://343nw7la01y3" path="res://Scripts/Projectiles/BurningPatch.gd" id="1_burningpatch"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_patch"]
+radius = 20.0
+
+[node name="BurningPatch" type="Area2D" unique_id=1206488845]
+z_index = 2
+collision_layer = 4
+collision_mask = 3
+monitoring = true
+monitorable = true
+script = ExtResource("1_burningpatch")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=849048929]
+shape = SubResource("CircleShape2D_patch")

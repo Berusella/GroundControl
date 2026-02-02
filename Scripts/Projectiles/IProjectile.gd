@@ -12,6 +12,7 @@ var sprite_path: String = ""
 var lifetime: float = 5.0
 var inherited_velocity: Vector2 = Vector2.ZERO
 var momentum_retention: float = 0.5  # How much of shooter's velocity to keep
+var persistent: bool = false  # If true, don't destroy on hit
 var _lifetime_timer: SceneTreeTimer = null
 
 
@@ -56,7 +57,7 @@ func initialize(shooter: Node2D, dir: Vector2, shooter_velocity: Vector2 = Vecto
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if body == owner_node:
+	if is_instance_valid(owner_node) and body == owner_node:
 		return
 	# Only deal damage to enemies, player hitbox handles player damage
 	if body is IEnemy:

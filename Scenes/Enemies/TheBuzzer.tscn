@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/TheBuzzer.gd" id="1_thebuzzer"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
+radius = 12.0
+
+[node name="TheBuzzer" type="CharacterBody2D"]
+z_index = 2
+collision_layer = 2
+script = ExtResource("1_thebuzzer")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 2
+shape = SubResource("CircleShape2D_enemy")

@@ -24,14 +24,17 @@ var keys: int = 0
 var sprite: Sprite2D = null
 
 # Shooting
-var fire_rate: float = 5.0  # Shots per second
+var fire_rate: float = 2.0  # Shots per second
 var fire_cooldown: float = 0.0
-var shot_range: float = 1.5  # Projectile lifetime in seconds
+var shot_range: float = 1.0  # Projectile lifetime in seconds
 
 # Invincibility
 var invincibility_duration: float = 1.0  # Seconds of i-frames after taking damage
 var invincibility_timer: float = 0.0
 var is_invincible: bool = false
+
+# Health cap
+const MAX_HEALTH_CAP: int = 20  # Maximum health player can have
 
 # Item system
 var collected_items: Array[Dictionary] = []
@@ -71,13 +74,14 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 func _on_hitbox_area_entered(area: Area2D) -> void:
 	if area is IProjectile and area.owner_node != self:
 		take_damage(area.damage)
-		area.queue_free()
+		if not area.persistent:
+			area.queue_free()
 
 
 func _setup_stats() -> void:
 	health = 10
 	max_health = 10
-	speed = 200
+	speed = 150
 	power = 3
 	is_alive = true
 
@@ -168,6 +172,8 @@ func heal(amount: int) -> void:
 	health += amount
 	if health > max_health:
 		health = max_health
+	if health > MAX_HEALTH_CAP:
+		health = MAX_HEALTH_CAP
 
 
 func die() -> void:
@@ -219,7 +225,11 @@ func _apply_stats(stats: Dictionary) -> void:
 	if stats.has("hp"):
 		var hp_bonus = int(stats["hp"])
 		max_health += hp_bonus
+		if max_health > MAX_HEALTH_CAP:
+			max_health = MAX_HEALTH_CAP
 		health += hp_bonus
+		if health > max_health:
+			health = max_health
 		print("  +%d HP (now %d/%d)" % [hp_bonus, health, max_health])
 
 	if stats.has("power"):
@@ -229,7 +239,7 @@ func _apply_stats(stats: Dictionary) -> void:
 
 	if stats.has("speed"):
 		var speed_bonus = stats["speed"]
-		speed += int(speed_bonus * 100)  # Speed is stored as pixels/sec, modifier is multiplier
+		speed += int(speed_bonus)
 		print("  +%s speed (now %d)" % [str(speed_bonus), speed])
 
 	if stats.has("fire_rate"):
@@ -408,11 +418,10 @@ func _special_pew_pew() -> void:
 
 func _special_ascend() -> void:
 	# Grant permanent +1 HP, +2 power and enable flight for the room
-	max_health += 1
-	health += 1
+	heal(1)
 	power += 2
 	is_flying = true
-	print("ASCEND! +1 HP (now %d/%d), +2 power (now %d), flight enabled" % [health, max_health, power])
+	print("ASCEND! Healed 1 HP (now %d/%d), +2 power (now %d), flight enabled" % [health, max_health, power])
 
 
 func _special_speed_shot() -> void:

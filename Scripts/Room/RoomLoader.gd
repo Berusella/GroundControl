@@ -66,3 +66,7 @@ func get_room_data_with_door(direction: String) -> Dictionary:
 
 func has_rooms() -> bool:
 	return not _rooms_data.is_empty()
+
+
+func get_all_room_data() -> Array:
+	return _rooms_data

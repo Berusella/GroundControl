@@ -1,0 +1,58 @@
+{
+	"items": [
+		{
+			"id": 6,
+			"name": "GRENADE",
+			"rarity": 2,
+			"special": "BIG BOOM",
+			"stats": null,
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 8,
+			"name": "Steroids",
+			"rarity": 3,
+			"special": null,
+			"stats": { "power": 1, "speed": 20 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 10,
+			"name": "Healing salve",
+			"rarity": 1,
+			"special": null,
+			"stats": { "hp": 1 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 19,
+			"name": "Football",
+			"rarity": 3,
+			"special": null,
+			"stats": null,
+			"projectile": "bounce",
+			"charges_special": false
+		},
+		{
+			"id": 21,
+			"name": "THE SPOON",
+			"rarity": 1,
+			"special": null,
+			"stats": { "speed": 20 },
+			"projectile": null,
+			"charges_special": false
+		},
+		{
+			"id": 24,
+			"name": "Know where it is",
+			"rarity": 3,
+			"special": null,
+			"stats": null,
+			"projectile": "homing",
+			"charges_special": false
+		}
+	]
+}

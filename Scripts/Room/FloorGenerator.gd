@@ -30,7 +30,7 @@ func generate_floor(room_count: int = 10) -> Dictionary:
 	_positions.append(start_pos)
 
 	var attempts = 0
-	# Reserve 2 spots for boss and treasure rooms
+	# Reserve 2 spots for boss and item rooms
 	var main_room_count = room_count - 2
 	var max_attempts = room_count * 10
 
@@ -44,7 +44,7 @@ func generate_floor(room_count: int = 10) -> Dictionary:
 		if _is_valid(new_pos) and new_pos not in _positions:
 			_positions.append(new_pos)
 
-	# Add boss and treasure rooms as guaranteed dead ends
+	# Add boss and item rooms as guaranteed dead ends
 	_add_special_rooms()
 
 	_build_floor_grid()
@@ -54,21 +54,34 @@ func generate_floor(room_count: int = 10) -> Dictionary:
 
 
 func _add_special_rooms() -> void:
-	var boss_pos = _find_dead_end_slot()
+	# Find boss room first (from original positions only)
+	var boss_pos = _find_dead_end_slot([])
 	if boss_pos != Vector2i(-1, -1):
 		_positions.append(boss_pos)
 
-	var treasure_pos = _find_dead_end_slot()
-	if treasure_pos != Vector2i(-1, -1):
-		_positions.append(treasure_pos)
+	# Find item room, excluding positions adjacent to boss room
+	var excluded: Array[Vector2i] = []
+	if boss_pos != Vector2i(-1, -1):
+		excluded.append(boss_pos)
+		# Also exclude positions that would only connect to boss room
+		for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			excluded.append(boss_pos + dir)
+
+	var item_pos = _find_dead_end_slot(excluded)
+	if item_pos != Vector2i(-1, -1):
+		_positions.append(item_pos)
 
 
-func _find_dead_end_slot() -> Vector2i:
+func _find_dead_end_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
 	# Find a position that connects to exactly one existing room
 	var candidates: Array[Vector2i] = []
 	var directions = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 
 	for pos in _positions:
+		# Skip if this position is excluded
+		if pos in excluded_positions:
+			continue
+
 		for dir in directions:
 			var candidate = pos + dir
 
@@ -76,11 +89,14 @@ func _find_dead_end_slot() -> Vector2i:
 				continue
 			if candidate in _positions:
 				continue
+			if candidate in excluded_positions:
+				continue
 
-			# Check how many neighbors this candidate would have
+			# Check how many neighbors this candidate would have (excluding special rooms)
 			var neighbor_count = 0
 			for check_dir in directions:
-				if (candidate + check_dir) in _positions:
+				var neighbor = candidate + check_dir
+				if neighbor in _positions and neighbor not in excluded_positions:
 					neighbor_count += 1
 
 			# Only one neighbor = dead end
@@ -112,9 +128,9 @@ func _set_starting_room() -> void:
 func _build_floor_grid() -> void:
 	_floor_grid.clear()
 
-	# Last two positions are boss and treasure rooms
+	# Last two positions are boss and item rooms
 	var boss_pos = _positions[-2] if _positions.size() >= 2 else Vector2i(-1, -1)
-	var treasure_pos = _positions[-1] if _positions.size() >= 1 else Vector2i(-1, -1)
+	var item_pos = _positions[-1] if _positions.size() >= 1 else Vector2i(-1, -1)
 
 	var map_index = 1
 	for pos in _positions:
@@ -123,8 +139,8 @@ func _build_floor_grid() -> void:
 
 		if pos == boss_pos:
 			room_type = "Boss"
-		elif pos == treasure_pos:
-			room_type = "Treasure"
+		elif pos == item_pos:
+			room_type = "Item"
 
 		var matching_room = _find_matching_room(doors, room_type)
 
@@ -174,8 +190,8 @@ func _print_grid() -> void:
 				match room_type:
 					"Boss":
 						row += "[BB]"
-					"Treasure":
-						row += "[TT]"
+					"Item":
+						row += "[IT]"
 					_:
 						row += "[%02d]" % map_index
 			else:

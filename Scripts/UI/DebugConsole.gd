@@ -4,7 +4,14 @@ class_name DebugConsole
 
 
 const ENEMY_SCENES = {
-	"small_sapling": preload("res://Scenes/Enemies/SmallSapling.tscn")
+	"small_sapling": preload("res://Scenes/Enemies/SmallSapling.tscn"),
+	"bruteling": preload("res://Scenes/Enemies/Bruteling.tscn"),
+	"soldier": preload("res://Scenes/Enemies/Soldier.tscn"),
+	"the_tourist": preload("res://Scenes/Enemies/TheTourist.tscn"),
+	"super_sniper": preload("res://Scenes/Enemies/SuperSniper.tscn"),
+	"boiling_barrel": preload("res://Scenes/Enemies/BoilingBarrel.tscn"),
+	"growing_tree": preload("res://Scenes/Enemies/GrowingTree.tscn"),
+	"the_buzzer": preload("res://Scenes/Enemies/TheBuzzer.tscn")
 }
 
 const PROJECTILE_SCENES = {

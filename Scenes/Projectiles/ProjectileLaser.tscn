@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://claser7k2m9p4"]
+[gd_scene format=3 uid="uid://claser7k2nap4"]
 
 [ext_resource type="Script" path="res://Scripts/Projectiles/ProjectileLaser.gd" id="1_laser"]
 

@@ -128,7 +128,8 @@
 		"west": true,
 		"obstacles": [],
 		"enemies": {
-			"small_sapling": [[100, 50], [-100, 50], [0, -80]]
+			"small_sapling": [[100, 50], [-100, 50]],
+			"bruteling": [[0, -80]]
 		}
 	},
 	{
@@ -140,7 +141,7 @@
 		"west": true,
 		"obstacles": [],
 		"enemies": {
-			"small_sapling": [[150, 0], [-150, 0]]
+			"soldier": [[150, 0], [-150, 0]]
 		}
 	},
 	{
@@ -151,7 +152,7 @@
 		"east": true,
 		"west": true,
 		"obstacles": [],
-		"enemies": {"small_sapling": [[100, 50], [-100, 50]]}
+		"enemies": {"the_tourist": [[100, 50], [-100, 50], [0, -60], [50, 80]]}
 	},
 	{
 		"id": 16,
@@ -255,7 +256,7 @@
 	},
 	{
 		"id": 22,
-		"room_type": "Treasure",
+		"room_type": "Item",
 		"north": true,
 		"south": false,
 		"east": false,
@@ -265,7 +266,7 @@
 	},
 	{
 		"id": 23,
-		"room_type": "Treasure",
+		"room_type": "Item",
 		"north": false,
 		"south": true,
 		"east": false,
@@ -275,7 +276,7 @@
 	},
 	{
 		"id": 24,
-		"room_type": "Treasure",
+		"room_type": "Item",
 		"north": false,
 		"south": false,
 		"east": true,
@@ -285,7 +286,7 @@
 	},
 	{
 		"id": 25,
-		"room_type": "Treasure",
+		"room_type": "Item",
 		"north": false,
 		"south": false,
 		"east": false,

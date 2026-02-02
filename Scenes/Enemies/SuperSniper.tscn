@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/SuperSniper.gd" id="1_supersniper"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
+radius = 12.0
+
+[node name="SuperSniper" type="CharacterBody2D"]
+z_index = 2
+collision_layer = 2
+script = ExtResource("1_supersniper")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 2
+shape = SubResource("CircleShape2D_enemy")

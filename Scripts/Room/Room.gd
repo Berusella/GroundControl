@@ -8,7 +8,14 @@ signal door_entered(direction: String)
 enum RoomType { NORMAL, BOSS, ITEM }
 
 const ENEMY_SCENES = {
-	"small_sapling": preload("res://Scenes/Enemies/SmallSapling.tscn")
+	"small_sapling": preload("res://Scenes/Enemies/SmallSapling.tscn"),
+	"bruteling": preload("res://Scenes/Enemies/Bruteling.tscn"),
+	"soldier": preload("res://Scenes/Enemies/Soldier.tscn"),
+	"the_tourist": preload("res://Scenes/Enemies/TheTourist.tscn"),
+	"super_sniper": preload("res://Scenes/Enemies/SuperSniper.tscn"),
+	"boiling_barrel": preload("res://Scenes/Enemies/BoilingBarrel.tscn"),
+	"growing_tree": preload("res://Scenes/Enemies/GrowingTree.tscn"),
+	"the_buzzer": preload("res://Scenes/Enemies/TheBuzzer.tscn")
 }
 
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
@@ -36,6 +43,7 @@ var item_pedestal: Node2D = null
 func _ready() -> void:
 	add_to_group("room")
 	_setup_doors()
+	_setup_navigation()
 
 
 func _setup_doors() -> void:
@@ -195,3 +203,37 @@ func get_spawn_position(from_direction: String = "") -> Vector2:
 			return door_west.global_position + Vector2(50, 0)
 
 	return player_spawn.global_position
+
+
+func _setup_navigation() -> void:
+	# Create NavigationRegion2D for pathfinding
+	var nav_region = NavigationRegion2D.new()
+	nav_region.name = "NavigationRegion"
+
+	# Create navigation polygon covering walkable floor area
+	var nav_poly = NavigationPolygon.new()
+
+	# Define room bounds (based on Room.tscn boundaries)
+	# Inset slightly from walls to prevent pathing into them
+	var margin = 20.0
+	var min_x = -350.0 + margin
+	var max_x = 390.0 - margin
+	var min_y = -270.0 + margin
+	var max_y = 260.0 - margin
+
+	# Create outline for walkable area
+	var outline = PackedVector2Array([
+		Vector2(min_x, min_y),
+		Vector2(max_x, min_y),
+		Vector2(max_x, max_y),
+		Vector2(min_x, max_y)
+	])
+
+	nav_poly.add_outline(outline)
+	nav_poly.make_polygons_from_outlines()
+
+	nav_region.navigation_polygon = nav_poly
+	add_child(nav_region)
+
+	# Move to back so it doesn't interfere with rendering
+	move_child(nav_region, 0)
