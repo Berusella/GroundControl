@@ -15,7 +15,11 @@ const ENEMY_SCENES = {
 	"super_sniper": preload("res://Scenes/Enemies/SuperSniper.tscn"),
 	"boiling_barrel": preload("res://Scenes/Enemies/BoilingBarrel.tscn"),
 	"growing_tree": preload("res://Scenes/Enemies/GrowingTree.tscn"),
-	"the_buzzer": preload("res://Scenes/Enemies/TheBuzzer.tscn")
+	"the_buzzer": preload("res://Scenes/Enemies/TheBuzzer.tscn"),
+	"boss_the_tree": preload("res://Scenes/Enemies/BossTheTree.tscn"),
+	"boss_military_experiment": preload("res://Scenes/Enemies/BossMilitaryExperiment.tscn"),
+	"boss_gorilla": preload("res://Scenes/Enemies/BossGorilla.tscn"),
+	"boss_vietnam_horror": preload("res://Scenes/Enemies/BossVietnamHorror.tscn")
 }
 
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")

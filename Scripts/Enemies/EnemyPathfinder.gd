@@ -5,7 +5,7 @@ class_name EnemyPathfinder
 ## Pathfinding helper for enemies using NavigationAgent2D.
 ## Supports BRUTE (toward target) and ESCAPE (away from target) movement.
 
-enum PathMode { BRUTE, ESCAPE }
+enum PathMode { BRUTE, ESCAPE, DASH }
 
 var nav_agent: NavigationAgent2D = null
 var parent_enemy: CharacterBody2D = null
@@ -13,6 +13,15 @@ var target: Node2D = null
 var path_mode: PathMode = PathMode.BRUTE
 var escape_distance: float = 300.0  # How far to flee before stopping
 var _is_ready: bool = false  # Track if navigation is fully set up
+
+# DASH movement vars
+var dash_charge: float = 0.0
+var dash_charge_threshold: float = 10.0  # Charge needed to dash
+var is_dashing: bool = false
+var dash_duration: float = 0.3  # How long the dash lasts
+var dash_timer: float = 0.0
+var dash_direction: Vector2 = Vector2.ZERO
+var dash_speed_multiplier: float = 5.0  # Speed boost during dash
 
 
 func _ready() -> void:
@@ -71,8 +80,40 @@ func get_movement_direction() -> Vector2:
 			return _get_brute_direction()
 		PathMode.ESCAPE:
 			return _get_escape_direction()
+		PathMode.DASH:
+			return _get_dash_direction()
 
 	return Vector2.ZERO
+
+
+## Update dash state - call this from _physics_process with delta
+func update_dash(delta: float, base_speed: float) -> void:
+	if is_dashing:
+		dash_timer -= delta
+		if dash_timer <= 0:
+			is_dashing = false
+			dash_charge = 0.0
+	else:
+		# Charge based on speed stat (speed per second adds to charge)
+		dash_charge += base_speed * delta * 0.01  # Scale so speed 100 adds 1/sec
+
+
+## Check if ready to dash and start the dash
+func try_start_dash() -> bool:
+	if is_dashing:
+		return false
+	if dash_charge >= dash_charge_threshold:
+		is_dashing = true
+		dash_timer = dash_duration
+		if target and is_instance_valid(target):
+			dash_direction = (target.global_position - parent_enemy.global_position).normalized()
+		return true
+	return false
+
+
+## Get current speed multiplier (for dash boost)
+func get_speed_multiplier() -> float:
+	return dash_speed_multiplier if is_dashing else 1.0
 
 
 func _get_brute_direction() -> Vector2:
@@ -123,6 +164,15 @@ func _get_escape_direction() -> Vector2:
 	return direction
 
 
+func _get_dash_direction() -> Vector2:
+	# DASH: charge up then burst toward target
+	if is_dashing:
+		return dash_direction
+	else:
+		# While charging, move slowly toward target
+		return _get_brute_direction() * 0.3
+
+
 func _get_direct_direction() -> Vector2:
 	# Direct movement without pathfinding
 	var to_target = target.global_position - parent_enemy.global_position
@@ -132,6 +182,10 @@ func _get_direct_direction() -> Vector2:
 			return to_target.normalized()
 		PathMode.ESCAPE:
 			return -to_target.normalized()
+		PathMode.DASH:
+			if is_dashing:
+				return dash_direction
+			return to_target.normalized() * 0.3
 
 	return Vector2.ZERO
 

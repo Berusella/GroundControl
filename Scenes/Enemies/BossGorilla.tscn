@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/BossGorilla.gd" id="1_boss"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_boss"]
+radius = 22.0
+
+[node name="BossGorilla" type="CharacterBody2D"]
+z_index = 2
+collision_layer = 2
+script = ExtResource("1_boss")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 2
+shape = SubResource("CircleShape2D_boss")
