@@ -21,6 +21,7 @@ var _visited_rooms: Dictionary = {}
 var _revealed_rooms: Dictionary = {}
 var _room_icons: Dictionary = {}
 var _current_indicator: TextureRect = null
+var _map_visible: bool = false
 
 const DIRECTIONS = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 
@@ -30,7 +31,14 @@ const DIRECTIONS = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 func _ready() -> void:
 	_load_textures()
 	_create_current_indicator()
+	map_container.visible = false
 	call_deferred("_find_floor_manager")
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("show_map"):
+		_map_visible = not _map_visible
+		map_container.visible = _map_visible
 
 
 func _load_textures() -> void:
@@ -157,7 +165,7 @@ func _update_map() -> void:
 
 		if pos == current_pos:
 			_current_indicator.position = Vector2(icon_x, icon_y)
-			_current_indicator.visible = true
+			_current_indicator.visible = _map_visible
 
 
 func _get_texture_key(room_type: String, is_cleared: bool) -> String:
@@ -176,4 +184,4 @@ func on_floor_changed() -> void:
 	_visited_rooms.clear()
 	_revealed_rooms.clear()
 	_clear_room_icons()
-	_current_indicator.visible = false
+	_current_indicator.visible = _map_visible
