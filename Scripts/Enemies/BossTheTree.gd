@@ -6,7 +6,6 @@ class_name BossTheTree
 const SPRITE_PATH = "res://Sprites/Characters/Enemies/boss_the_tree.png"
 const PROJECTILE_SCENE = preload("res://Scenes/Projectiles/ProjectileStandard.tscn")
 
-# Swipe attack
 var swipe_timer: float = 0.0
 var swipe_interval: float = 10.0
 var swipe_charge_time: float = 2.0
@@ -17,7 +16,6 @@ var is_charging_swipe: bool = false
 var swipe_charge_timer: float = 0.0
 var swipe_direction: Vector2 = Vector2.ZERO
 
-# Above projectile attack
 var shoot_timer: float = 0.0
 var shoot_interval: float = 2.0
 
@@ -34,7 +32,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 200
 	max_health = 200
-	speed = 0  # Stationary
+	speed = 0
 	power = 2
 	is_alive = true
 
@@ -77,11 +75,9 @@ func _execute_swipe() -> void:
 	if not target or not is_instance_valid(target):
 		return
 
-	# Check if player is in cone
 	var to_player = target.global_position - global_position
 	var distance = to_player.length()
 
-	# Account for node scale in range check
 	var actual_range = swipe_range * scale.x
 	if distance > actual_range:
 		return
@@ -101,7 +97,6 @@ func _handle_shooting(delta: float) -> void:
 
 
 func _shoot_from_above() -> void:
-	# Spawn projectile above target that falls down
 	var projectile = PROJECTILE_SCENE.instantiate()
 	projectile.global_position = target.global_position + Vector2(0, -200)
 	projectile.initialize(self, Vector2.DOWN)
@@ -110,7 +105,6 @@ func _shoot_from_above() -> void:
 
 func _draw() -> void:
 	if is_charging_swipe:
-		# Draw cone indicator
 		var cone_length = swipe_range
 		var half_angle = deg_to_rad(swipe_cone_angle / 2)
 		var points = PackedVector2Array()

@@ -2,18 +2,17 @@ extends IProjectile
 
 class_name ProjectileLaser
 
-## Charged laser projectile. Charges while shoot is held, then fires continuous beam.
 
 enum State { CHARGING, FIRING, DONE }
 
 const BEAM_DURATION = 2.0
-const DAMAGE_INTERVAL = 0.33  # 3 hits per second
-const BASE_BEAM_SPEED = 300.0  # Used to calculate beam length from range
+const DAMAGE_INTERVAL = 0.33
+const BASE_BEAM_SPEED = 300.0
 
 var state: State = State.CHARGING
 var beam_length: float = 500.0
 var charge_progress: float = 0.0
-var charge_time_required: float = 2.0  # Will be set based on owner's fire_rate
+var charge_time_required: float = 2.0
 var beam_timer: float = 0.0
 var damage_timer: float = 0.0
 
@@ -23,19 +22,17 @@ var _charge_indicator: Line2D = null
 
 
 func _init() -> void:
-	sprite_path = ""  # No sprite during charge, we use custom visuals
-	speed = 0.0  # Doesn't move like normal projectile
-	lifetime = 999.0  # Managed manually
+	sprite_path = ""
+	speed = 0.0
+	lifetime = 999.0
 
 
 func _ready() -> void:
-	# Restore lifetime before super._ready() starts the timer
 	lifetime = 999.0
 
 	super._ready()
 	add_to_group("laser_projectile")
 
-	# Check if another laser from this owner already exists - if so, self-destruct
 	if _has_existing_laser_from_owner():
 		queue_free()
 		return
@@ -49,14 +46,13 @@ func _setup_raycast() -> void:
 	_raycast.enabled = true
 	_raycast.collide_with_bodies = true
 	_raycast.collide_with_areas = false
-	_raycast.collision_mask = 1  # Walls only - beam passes through enemies
+	_raycast.collision_mask = 1
 	_raycast.hit_from_inside = false
-	_raycast.target_position = Vector2(beam_length, 0)  # Local space (node is rotated)
+	_raycast.target_position = Vector2(beam_length, 0)
 	add_child(_raycast)
 
 
 func _setup_charge_indicator() -> void:
-	# Small line showing charge direction
 	_charge_indicator = Line2D.new()
 	_charge_indicator.width = 2.0
 	_charge_indicator.default_color = Color(1.0, 0.5, 0.5, 0.5)
@@ -70,7 +66,7 @@ func _setup_beam_visual() -> void:
 	_line.width = 6.0
 	_line.default_color = Color(1.0, 0.2, 0.2, 0.9)
 	_line.add_point(Vector2.ZERO)
-	_line.add_point(Vector2(beam_length, 0))  # Local space (node is rotated)
+	_line.add_point(Vector2(beam_length, 0))
 	add_child(_line)
 
 	if _charge_indicator:
@@ -80,18 +76,16 @@ func _setup_beam_visual() -> void:
 func initialize(shooter: Node2D, dir: Vector2, shooter_velocity: Vector2 = Vector2.ZERO) -> void:
 	owner_node = shooter
 	direction = dir.normalized()
-	inherited_velocity = Vector2.ZERO  # Laser doesn't inherit velocity
+	inherited_velocity = Vector2.ZERO
 
 	if shooter is ICharacter:
 		damage = shooter.power
 
-	# Calculate charge time: 10 / fire_rate
 	if shooter.get("fire_rate"):
 		charge_time_required = 10.0 / shooter.fire_rate
 	else:
 		charge_time_required = 2.0
 
-	# Calculate beam length from shot_range (range = lifetime * speed)
 	if shooter.get("shot_range"):
 		beam_length = shooter.shot_range * BASE_BEAM_SPEED
 	else:
@@ -119,22 +113,17 @@ func _physics_process(delta: float) -> void:
 
 
 func _process_charging(delta: float) -> void:
-	# Follow owner
 	if owner_node and is_instance_valid(owner_node):
 		global_position = owner_node.global_position + direction * 20.0
 
-	# Check if still shooting (any direction counts, allows aiming while charging)
 	var shoot_dir = _get_shoot_direction()
 	if shoot_dir == Vector2.ZERO:
-		# Released shoot - cancel
 		queue_free()
 		return
 
-	# Update direction to current aim while charging
 	direction = shoot_dir.normalized()
 	rotation = direction.angle()
 
-	# Update charge
 	charge_progress += delta
 	_update_charge_indicator()
 
@@ -167,7 +156,6 @@ func _start_firing() -> void:
 
 
 func _process_firing(delta: float) -> void:
-	# Follow owner while firing
 	if owner_node and is_instance_valid(owner_node):
 		global_position = owner_node.global_position + direction * 20.0
 
@@ -176,7 +164,6 @@ func _process_firing(delta: float) -> void:
 		state = State.DONE
 		return
 
-	# Deal damage periodically
 	damage_timer -= delta
 	if damage_timer <= 0:
 		_deal_beam_damage()
@@ -186,13 +173,11 @@ func _process_firing(delta: float) -> void:
 
 
 func _deal_beam_damage() -> void:
-	# Get beam end point (wall or max length)
 	_raycast.force_raycast_update()
 	var beam_end = global_position + direction * beam_length
 	if _raycast.is_colliding():
 		beam_end = _raycast.get_collision_point()
 
-	# Damage all enemies along the beam
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		if enemy == owner_node or not is_instance_valid(enemy):
@@ -203,7 +188,6 @@ func _deal_beam_damage() -> void:
 
 
 func _is_point_on_beam(point: Vector2, beam_end: Vector2) -> bool:
-	# Check if point is close enough to the beam line
 	var beam_start = global_position
 	var beam_vec = beam_end - beam_start
 	var beam_len = beam_vec.length()
@@ -213,15 +197,13 @@ func _is_point_on_beam(point: Vector2, beam_end: Vector2) -> bool:
 	var to_point = point - beam_start
 	var projection = to_point.dot(beam_vec.normalized())
 
-	# Point must be between start and end
 	if projection < 0 or projection > beam_len:
 		return false
 
-	# Check perpendicular distance to beam
 	var closest_point = beam_start + beam_vec.normalized() * projection
 	var distance = point.distance_to(closest_point)
 
-	return distance < 20.0  # Hit radius
+	return distance < 20.0
 
 
 func _update_beam_endpoint() -> void:
@@ -230,7 +212,7 @@ func _update_beam_endpoint() -> void:
 
 	_raycast.force_raycast_update()
 
-	var end_point = Vector2(beam_length, 0)  # Local space, rotated by node
+	var end_point = Vector2(beam_length, 0)
 	if _raycast.is_colliding():
 		var collision_point = _raycast.get_collision_point()
 		end_point = to_local(collision_point)
@@ -238,6 +220,5 @@ func _update_beam_endpoint() -> void:
 	_line.set_point_position(1, end_point)
 
 
-# Override parent - don't destroy on body contact during charging/firing
 func _on_body_entered(_body: Node2D) -> void:
-	pass  # Beam handles its own damage
+	pass

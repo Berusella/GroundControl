@@ -26,7 +26,6 @@ func show_game_over(items: Array[Dictionary]) -> void:
 
 
 func _populate_items() -> void:
-	# Clear existing items
 	for child in items_container.get_children():
 		child.queue_free()
 

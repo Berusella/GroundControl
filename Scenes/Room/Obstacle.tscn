@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://48ju5a36tp73"]
+
+[ext_resource type="Script" path="res://Scripts/Room/Obstacle.gd" id="1_obstacle"]
+
+[node name="Obstacle" type="StaticBody2D"]
+collision_layer = 1
+script = ExtResource("1_obstacle")

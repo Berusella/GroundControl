@@ -22,7 +22,6 @@ const SPECIAL_COOLDOWNS = {
 	"MIND CONTROL": 5, "TIME STOP": 4, "SPEED SHOT": 6, "COPY": 3
 }
 
-# Special ability constants
 const BIG_BOOM_RADIUS: float = 150.0
 const BIG_BOOM_DAMAGE_MULTIPLIER: int = 10
 const SPEED_SHOT_FIRE_RATE: float = 10.0
@@ -36,29 +35,24 @@ const PEW_PEW_DAMAGE_MULTIPLIER: float = 1.5
 var keys: int = 0
 var sprite: Sprite2D = null
 
-# Shooting
-var fire_rate: float = 2.0  # Shots per second
+var fire_rate: float = 2.0
 var fire_cooldown: float = 0.0
-var shot_range: float = 1.0  # Projectile lifetime in seconds
+var shot_range: float = 1.0
 
-# Invincibility
-var invincibility_duration: float = 1.0  # Seconds of i-frames after taking damage
+var invincibility_duration: float = 1.0
 var invincibility_timer: float = 0.0
 var is_invincible: bool = false
 
-# Health cap
-const MAX_HEALTH_CAP: int = 20  # Maximum health player can have
+const MAX_HEALTH_CAP: int = 20
 
-# Item system
 var collected_items: Array[Dictionary] = []
 var extra_lives: int = 0
 var current_special: String = ""
-var special_cooldown: int = 0  # Rooms until usable
-var special_max_cooldown: int = 0  # For UI progress display
+var special_cooldown: int = 0
+var special_max_cooldown: int = 0
 var projectile_modifiers: Array[String] = []
 
-# Active effects tracking
-var active_effects: Dictionary = {}  # {"effect_name": remaining_time}
+var active_effects: Dictionary = {}
 var is_flying: bool = false
 var is_copied: bool = false
 var original_fire_rate: float = 0.0
@@ -94,7 +88,7 @@ func _on_hitbox_area_entered(area: Area2D) -> void:
 func _setup_stats() -> void:
 	health = 5
 	max_health = 5
-	speed = 150
+	speed = 170
 	power = 3
 	is_alive = true
 	keys = 1
@@ -115,7 +109,6 @@ func _physics_process(delta: float) -> void:
 func _handle_invincibility(delta: float) -> void:
 	if is_invincible:
 		invincibility_timer -= delta
-		# Flash effect - toggle visibility
 		if sprite:
 			sprite.visible = int(invincibility_timer * 10) % 2 == 0
 		if invincibility_timer <= 0:
@@ -167,7 +160,6 @@ func _shoot(direction: Vector2) -> void:
 		var projectile = projectile_scene.instantiate()
 		var spawn_offset = direction * 20.0
 
-		# Offset second shot slightly perpendicular to direction
 		if i == 1:
 			var perpendicular = Vector2(-direction.y, direction.x) * 10.0
 			spawn_offset += perpendicular
@@ -222,24 +214,20 @@ func apply_item(item_data: Dictionary) -> void:
 
 	item_picked_up.emit(item_data)
 
-	# Apply stat modifiers
 	var stats = item_data.get("stats")
 	if stats != null and stats is Dictionary:
 		_apply_stats(stats)
 
-	# Apply special ability
 	var special = item_data.get("special")
 	if special != null and special is String and not special.is_empty():
 		current_special = special
 		special_cooldown = 0  # Ready immediately
 		print("Gained special ability: %s" % special)
 
-	# Apply projectile modifier
 	var projectile = item_data.get("projectile")
 	if projectile != null and projectile is String and not projectile.is_empty():
 		_apply_projectile_modifier(projectile)
 
-	# Check if item charges special
 	if item_data.get("charges_special", false) and not current_special.is_empty():
 		if special_cooldown > 0:
 			special_cooldown = max(0, special_cooldown - 1)
@@ -288,7 +276,6 @@ func _apply_projectile_modifier(modifier: String) -> void:
 		projectile_modifiers.append(modifier)
 		print("  Added projectile modifier: %s" % modifier)
 
-	# Update projectile scene to the most recent modifier
 	if modifier in PROJECTILE_SCENES:
 		projectile_scene = PROJECTILE_SCENES[modifier]
 		print("  Projectile type changed to: %s" % modifier)
@@ -302,7 +289,6 @@ func use_special() -> void:
 		print("Special not ready! %d rooms remaining" % special_cooldown)
 		return
 
-	# End COPY if active (using any special ends COPY)
 	if is_copied:
 		_end_copy()
 
@@ -335,10 +321,8 @@ func _perform_special(special_name: String) -> void:
 
 
 func _special_big_boom() -> void:
-	# Deal damage to enemies within radius around player
 	var boom_damage: int = power * BIG_BOOM_DAMAGE_MULTIPLIER
 
-	# Spawn explosion visual
 	var explosion = EXPLOSION_SCENE.instantiate()
 	explosion.radius = BIG_BOOM_RADIUS
 	explosion.global_position = global_position
@@ -358,21 +342,17 @@ func _special_big_boom() -> void:
 
 
 func on_room_entered() -> void:
-	# Reset room-based effects
 	is_flying = false
 
-	# End all active timed effects
 	for effect_name in active_effects.keys():
 		_end_effect(effect_name)
 	active_effects.clear()
 
-	# End COPY on floor change (handled separately since it persists across rooms)
 	if is_copied:
 		_end_copy()
 
 
 func on_room_cleared() -> void:
-	# Called when all enemies in a room are defeated
 	if special_cooldown > 0:
 		special_cooldown -= 1
 		print("Special cooldown: %d rooms remaining" % special_cooldown)
@@ -410,12 +390,10 @@ func _end_effect(effect_name: String) -> void:
 
 
 func _unfreeze_all() -> void:
-	# Unfreeze enemies
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		enemy.set_physics_process(true)
 
-	# Unfreeze enemy projectiles
 	var projectiles = get_tree().get_nodes_in_group("projectile")
 	for proj in projectiles:
 		if proj is IProjectile and proj.owner_node != self:
@@ -430,7 +408,6 @@ func _end_copy() -> void:
 
 
 func _special_pew_pew() -> void:
-	# Shoot a scaled projectile with bonus damage
 	var shoot_direction = _get_shoot_direction()
 	if shoot_direction == Vector2.ZERO:
 		shoot_direction = Vector2.RIGHT
@@ -447,7 +424,6 @@ func _special_pew_pew() -> void:
 
 
 func _special_ascend() -> void:
-	# Grant permanent +1 HP, +2 power and enable flight for the room
 	heal(1)
 	power += 2
 	is_flying = true
@@ -455,7 +431,6 @@ func _special_ascend() -> void:
 
 
 func _special_speed_shot() -> void:
-	# Temporarily boost fire rate
 	original_fire_rate = fire_rate
 	fire_rate = SPEED_SHOT_FIRE_RATE
 	active_effects["SPEED SHOT"] = SPEED_SHOT_DURATION
@@ -463,7 +438,6 @@ func _special_speed_shot() -> void:
 
 
 func _special_time_stop() -> void:
-	# Freeze enemies and their projectiles
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		enemy.set_physics_process(false)
@@ -478,19 +452,16 @@ func _special_time_stop() -> void:
 
 
 func _special_mind_control() -> void:
-	# Control one enemy - mirrors player input
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	if enemies.is_empty():
 		print("MIND CONTROL failed - no enemies to control")
 		return
 
-	# Pick the nearest enemy that's not spawning
 	var nearest_enemy: IEnemy = null
 	var nearest_dist: float = INF
 
 	for enemy in enemies:
 		if enemy is IEnemy:
-			# Skip enemies still in spawn delay
 			if enemy.is_spawning:
 				continue
 			var dist = global_position.distance_to(enemy.global_position)
@@ -508,13 +479,11 @@ func _special_mind_control() -> void:
 
 
 func _special_copy() -> void:
-	# Transform into a random enemy until next special or floor change
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	if enemies.is_empty():
 		print("COPY failed - no enemies to copy")
 		return
 
-	# Pick a random enemy
 	var random_enemy = enemies[randi() % enemies.size()]
 
 	if random_enemy is IEnemy and random_enemy.sprite:
@@ -527,7 +496,6 @@ func _special_copy() -> void:
 
 
 func _special_invert() -> void:
-	# Swap BRUTE↔ESCAPE enemy movement types
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var inverted_count: int = 0
 

@@ -26,7 +26,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 10
 	max_health = 10
-	speed = 60  # 0.6 * 100 base
+	speed = 60
 	power = 1
 	is_alive = true
 
@@ -51,7 +51,6 @@ func _update_mode(delta: float) -> void:
 
 
 func _pick_new_mode() -> void:
-	# Switch between player movement and random (1-3 second interval)
 	if current_mode == MovementMode.PLAYER:
 		current_mode = MovementMode.RANDOM
 		_pick_new_wander_direction()
@@ -62,7 +61,6 @@ func _pick_new_mode() -> void:
 
 
 func _move_like_player() -> void:
-	# Mirror player's input
 	var dir = Vector2(
 		Input.get_axis("Move_left", "Move_right"),
 		Input.get_axis("Move_up", "Move_down")

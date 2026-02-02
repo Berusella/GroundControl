@@ -7,7 +7,7 @@ const SPRITE_PATH = "res://Sprites/Characters/Enemies/boiling_barrel.png"
 const BURNING_PATCH_SCENE = preload("res://Scenes/Projectiles/BurningPatch.tscn")
 
 var burn_timer: float = 0.0
-var burn_interval: float = 1.0  # Leave burning patch every second
+var burn_interval: float = 1.0
 
 
 func _init() -> void:
@@ -23,7 +23,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 20
 	max_health = 20
-	speed = 60  # 0.6 * 100 base
+	speed = 60
 	power = 1
 	is_alive = true
 

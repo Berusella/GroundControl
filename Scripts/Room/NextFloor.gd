@@ -19,7 +19,6 @@ func _setup_sprite() -> void:
 
 
 func _setup_collision() -> void:
-	# Create collision shape if not already present
 	if not has_node("CollisionShape2D"):
 		var collision = CollisionShape2D.new()
 		var shape = CircleShape2D.new()

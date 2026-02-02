@@ -1,15 +1,15 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cyt3u3tgl7hml"]
 
-[ext_resource type="Script" path="res://Scripts/Enemies/BossMilitaryExperiment.gd" id="1_boss"]
+[ext_resource type="Script" uid="uid://p4tjuecnns5n" path="res://Scripts/Enemies/BossMilitaryExperiment.gd" id="1_boss"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_boss"]
 radius = 20.0
 
-[node name="BossMilitaryExperiment" type="CharacterBody2D"]
+[node name="BossMilitaryExperiment" type="CharacterBody2D" unique_id=455860056]
 z_index = 2
 collision_layer = 2
 script = ExtResource("1_boss")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=633207060]
 z_index = 2
 shape = SubResource("CircleShape2D_boss")

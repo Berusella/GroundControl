@@ -3,10 +3,9 @@
 [ext_resource type="Script" uid="uid://durdqo13m8y4l" path="res://Scripts/Player/Player.gd" id="1_kyqiw"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qbkls"]
-radius = 10.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
-radius = 12.0
+radius = 11.0
 
 [node name="Player" type="CharacterBody2D" unique_id=351647391]
 z_index = 2
@@ -18,7 +17,6 @@ shape = SubResource("CircleShape2D_qbkls")
 [node name="Hitbox" type="Area2D" parent="." unique_id=1595793209]
 collision_layer = 0
 collision_mask = 6
-monitoring = true
 
 [node name="HitboxShape" type="CollisionShape2D" parent="Hitbox" unique_id=641227990]
 shape = SubResource("CircleShape2D_hitbox")

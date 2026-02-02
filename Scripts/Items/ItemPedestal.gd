@@ -40,11 +40,9 @@ func _process(delta: float) -> void:
 func _animate_item(delta: float) -> void:
 	_float_time += delta
 
-	# Float up and down
 	var float_offset = sin(_float_time * ITEM_FLOAT_SPEED) * ITEM_FLOAT_AMPLITUDE
 	item_container.position.y = _base_item_position.y + float_offset
 
-	# Rotate
 	if item.sprite:
 		item.sprite.rotation += delta * ITEM_ROTATION_SPEED
 
@@ -77,23 +75,19 @@ func _spawn_item() -> void:
 	item = Item.new()
 	item.initialize(item_data)
 
-	# Set collision to detect player (layer 1)
 	item.collision_layer = 0
 	item.collision_mask = 1
 	item.monitoring = true
 
-	# Create collision shape for pickup
 	var collision = CollisionShape2D.new()
 	var shape = CircleShape2D.new()
 	shape.radius = 16.0
 	collision.shape = shape
 	item.add_child(collision)
 
-	# Create sprite for the item using SpriteFactory
 	var sprite_path = _get_item_sprite_path()
 	item.sprite = SpriteFactory.create_and_attach(item, sprite_path)
 
-	# Connect to pickup
 	item.body_entered.connect(_on_item_picked_up)
 
 	item_container.add_child(item)

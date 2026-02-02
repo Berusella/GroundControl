@@ -19,7 +19,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 25
 	max_health = 25
-	speed = 90  # 0.9 * 100 base
+	speed = 90
 	power = 1
 	is_alive = true
 

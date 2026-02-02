@@ -27,7 +27,6 @@ const PROJECTILE_SCENES = {
 
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
 
-# Map console-friendly names to actual special ability names
 const SPECIAL_ABILITIES = {
 	"pew_pew": "PEW PEW",
 	"pewpew": "PEW PEW",
@@ -329,7 +328,6 @@ func _cmd_teleport(args: String) -> void:
 		_log("No " + target_type + " room found on this floor")
 		return
 
-	# Find a valid door direction to spawn at
 	var spawn_direction = ""
 	if room_data.get("south", false):
 		spawn_direction = "north"  # Enter from south door
@@ -340,7 +338,6 @@ func _cmd_teleport(args: String) -> void:
 	elif room_data.get("east", false):
 		spawn_direction = "west"   # Enter from east door
 
-	# Load the room with door spawn
 	floor_manager._load_room_at_position(target_pos, spawn_direction)
 	_log("Teleported to " + target_type + " room at " + str(target_pos))
 
@@ -354,21 +351,17 @@ func _cmd_item(args: String) -> void:
 	var pedestal = ITEM_PEDESTAL_SCENE.instantiate()
 	get_tree().current_scene.add_child(pedestal)
 
-	# Set position after adding to tree
 	var spawn_offset = Vector2(80, 0)
 	pedestal.global_position = player.global_position + spawn_offset
 
 	if args.is_empty():
-		# Random item
 		pedestal.set_random_item()
 		_log("Spawned item pedestal with random item")
 	elif args.is_valid_int():
-		# Specific item by ID
 		var item_id = int(args)
 		pedestal.set_item_by_id(item_id)
 		_log("Spawned item pedestal with item ID: " + str(item_id))
 	else:
-		# Try to find by name
 		pedestal.set_item_by_name(args)
 		_log("Spawned item pedestal with item: " + args)
 
@@ -404,7 +397,6 @@ func _get_current_room() -> Room:
 	var rooms = get_tree().get_nodes_in_group("room")
 	if rooms.size() > 0:
 		return rooms[0]
-	# Try to find via FloorManager
 	var floor_manager = _get_floor_manager()
 	if floor_manager:
 		return floor_manager._current_room
@@ -415,7 +407,6 @@ func _get_floor_manager() -> FloorManager:
 	var main = get_tree().current_scene
 	if main and main.has_method("get") and main.get("floor_manager"):
 		return main.floor_manager
-	# Try direct child lookup
 	for child in main.get_children():
 		if child is FloorManager:
 			return child

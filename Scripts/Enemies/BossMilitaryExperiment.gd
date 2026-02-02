@@ -7,14 +7,12 @@ const SPRITE_PATH = "res://Sprites/Characters/Enemies/boss_military_experiment.p
 const PROJECTILE_SCENE = preload("res://Scenes/Projectiles/ProjectileStandard.tscn")
 const BRUTELING_SCENE = preload("res://Scenes/Enemies/Bruteling.tscn")
 
-# Shooting
 var fire_rate: float = 2.0
 var fire_cooldown: float = 0.0
 
-# Spawning brutelings
-var bruteling_timer: float = 5.0  # Initial delay before first spawn
+var bruteling_timer: float = 5.0
 var bruteling_interval: float = 8.0
-var max_spawned_total: int = 5  # Total brutelings ever spawned (not concurrent)
+var max_spawned_total: int = 5
 var total_spawned: int = 0
 
 
@@ -31,7 +29,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 200
 	max_health = 200
-	speed = 50  # 0.7 * 100 base
+	speed = 50
 	power = 2
 	is_alive = true
 
@@ -69,12 +67,10 @@ func _spawn_bruteling() -> void:
 	var spawn_offset = Vector2(50, 0).rotated(randf() * TAU)
 	bruteling.global_position = global_position + spawn_offset
 
-	# Add to current room if possible
 	var room = _get_current_room()
 	if room:
 		room.get_node("Enemies").add_child(bruteling)
 		room.enemies.append(bruteling)
-		# Connect to room's enemy died handler so room clears properly
 		bruteling.tree_exited.connect(room._on_enemy_died.bind(bruteling))
 	else:
 		get_tree().current_scene.add_child(bruteling)

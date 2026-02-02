@@ -12,11 +12,9 @@ var current_mode: BehaviorMode = BehaviorMode.BRUTE
 var mode_timer: float = 0.0
 var mode_switch_interval: float = 5.0
 
-# Base speed that gets modified
 var base_speed: float = 80.0
-var speed_modifier: float = 50.0  # 0.5 * 100
+var speed_modifier: float = 50.0
 
-# BRUTE mode - swipe attack
 var swipe_charge_time: float = 1.0
 var swipe_cone_angle: float = 45.0
 var swipe_range: float = 60.0
@@ -26,7 +24,6 @@ var swipe_charge_timer: float = 0.0
 var swipe_direction: Vector2 = Vector2.ZERO
 var can_swipe: bool = true
 
-# ESCAPE mode - shooting
 var fire_rate: float = 2.0
 var fire_cooldown: float = 0.0
 
@@ -45,7 +42,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 250
 	max_health = 250
-	speed = base_speed + speed_modifier  # Start in BRUTE mode with bonus speed
+	speed = base_speed + speed_modifier
 	power = 2
 	is_alive = true
 
@@ -120,7 +117,7 @@ func _start_swipe_charge() -> void:
 
 func _execute_swipe() -> void:
 	is_charging_swipe = false
-	can_swipe = false  # Can only swipe once per BRUTE phase
+	can_swipe = false
 	queue_redraw()
 
 	if not target or not is_instance_valid(target):

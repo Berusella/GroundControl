@@ -6,7 +6,7 @@ class_name SuperSniper
 const SPRITE_PATH = "res://Sprites/Characters/Enemies/super_sniper.png"
 const PROJECTILE_SCENE = preload("res://Scenes/Projectiles/ProjectileHoming.tscn")
 
-var fire_rate: float = 3.0  # Shoot every 3 seconds
+var fire_rate: float = 3.0
 var fire_cooldown: float = 0.0
 var raycast: RayCast2D = null
 
@@ -25,7 +25,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 12
 	max_health = 12
-	speed = 20  # 0.2 * 100 base
+	speed = 20
 	power = 1
 	is_alive = true
 

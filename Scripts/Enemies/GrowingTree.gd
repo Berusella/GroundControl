@@ -5,8 +5,8 @@ class_name GrowingTree
 
 const SPRITE_PATH = "res://Sprites/Characters/Enemies/growing_tree.png"
 
-var swipe_range: float = 80.0  # Range at which player triggers swipe
-var swipe_cone_angle: float = 60.0  # Cone angle in degrees
+var swipe_range: float = 80.0
+var swipe_cone_angle: float = 60.0
 var swipe_damage: int = 2
 var charge_time: float = 2.0
 var is_charging: bool = false
@@ -26,7 +26,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 30
 	max_health = 30
-	speed = 0  # Stationary
+	speed = 0
 	power = 1
 	is_alive = true
 
@@ -74,23 +74,20 @@ func _execute_swipe() -> void:
 	if not target or not is_instance_valid(target):
 		return
 
-	# Check if player is in cone
 	var to_player = target.global_position - global_position
 	var distance = to_player.length()
 
-	if distance > swipe_range * 1.5:  # Slightly larger range for the actual attack
+	if distance > swipe_range * 1.5:
 		return
 
 	var angle_to_player = rad_to_deg(swipe_direction.angle_to(to_player.normalized()))
 	if abs(angle_to_player) <= swipe_cone_angle / 2:
-		# Player is in cone, deal damage
 		if target.has_method("take_damage"):
 			target.take_damage(swipe_damage)
 
 
 func _draw() -> void:
 	if is_charging:
-		# Draw cone indicator
 		var cone_length = swipe_range * 1.5
 		var half_angle = deg_to_rad(swipe_cone_angle / 2)
 		var points = PackedVector2Array()

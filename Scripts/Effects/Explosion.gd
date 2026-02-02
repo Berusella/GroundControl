@@ -24,7 +24,6 @@ func _setup_sprite() -> void:
 		push_warning("Explosion texture not found: " + SPRITE_PATH)
 		return
 
-	# Scale sprite to match radius (diameter = radius * 2)
 	var texture_size = sprite.texture.get_size()
 	var target_diameter = radius * 2
 	var scale_factor = target_diameter / max(texture_size.x, texture_size.y)

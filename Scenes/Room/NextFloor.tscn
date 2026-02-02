@@ -1,14 +1,13 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://43b61p8wgj7u"]
 
-[ext_resource type="Script" path="res://Scripts/Room/NextFloor.gd" id="1_nextfloor"]
+[ext_resource type="Script" uid="uid://bpgys0j7pk0se" path="res://Scripts/Room/NextFloor.gd" id="1_nextfloor"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_nextfloor"]
 radius = 20.0
 
-[node name="NextFloor" type="Area2D"]
+[node name="NextFloor" type="Area2D" unique_id=2083266750]
 collision_layer = 0
-collision_mask = 1
 script = ExtResource("1_nextfloor")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=32997741]
 shape = SubResource("CircleShape2D_nextfloor")

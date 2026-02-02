@@ -42,7 +42,6 @@ func _find_player() -> void:
 
 
 func _create_scrap_icons() -> void:
-	# Clear existing icons
 	for icon in scrap_icons:
 		icon.queue_free()
 	scrap_icons.clear()
@@ -50,7 +49,6 @@ func _create_scrap_icons() -> void:
 	if not player:
 		return
 
-	# Create icons for max health
 	for i in range(player.max_health):
 		var icon = TextureRect.new()
 		icon.texture = scrap_full_texture
@@ -60,7 +58,6 @@ func _create_scrap_icons() -> void:
 
 
 func _update_health() -> void:
-	# Add new icons if max health increased (from items)
 	while scrap_icons.size() < player.max_health:
 		var icon = TextureRect.new()
 		icon.texture = scrap_full_texture

@@ -22,15 +22,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# Clear invalid target
 	if target and not is_instance_valid(target):
 		target = null
 
-	# Find new target if needed
 	if not target:
 		_find_nearest_target()
 
-	# Home toward target
 	if target and is_instance_valid(target):
 		var target_dir = (target.global_position - global_position).normalized()
 		direction = direction.lerp(target_dir, turn_speed * delta).normalized()
@@ -43,7 +40,6 @@ func _on_detection_body_entered(body: Node2D) -> void:
 	if body == owner_node:
 		return
 
-	# Track valid targets based on who shot the projectile
 	if owner_node is Player and body is IEnemy:
 		_targets_in_range.append(body)
 	elif not (owner_node is Player) and body is Player:

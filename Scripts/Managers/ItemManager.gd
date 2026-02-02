@@ -32,7 +32,6 @@ func _load_items_data() -> void:
 	else:
 		_items_data = data
 
-	# Build lookup dictionary
 	for item in _items_data:
 		var id = item.get("id", -1)
 		if id >= 0:
@@ -45,7 +44,6 @@ func get_item_by_id(id: int) -> Dictionary:
 	if id in _items_by_id:
 		return _items_by_id[id].duplicate()
 
-	# Default to id 0 if not found, or first item
 	if 0 in _items_by_id:
 		push_warning("Item ID %d not found, defaulting to ID 0" % id)
 		return _items_by_id[0].duplicate()
@@ -84,12 +82,10 @@ func get_random_item_by_rarity(max_rarity: int) -> Dictionary:
 			eligible_items.append(item)
 
 	if eligible_items.is_empty():
-		# Fall back to any item if none match
 		if not _items_data.is_empty():
 			return _items_data.pick_random().duplicate()
 		return {}
 
-	# Weight by inverse rarity (lower rarity = more common)
 	var weighted_pool: Array = []
 	for item in eligible_items:
 		var rarity = item.get("rarity", 1)

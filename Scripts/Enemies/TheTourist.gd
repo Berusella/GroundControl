@@ -23,7 +23,7 @@ func _ready() -> void:
 func _setup_stats() -> void:
 	health = 3
 	max_health = 3
-	speed = 150  # 1.5 * 100 base
+	speed = 150
 	power = 1
 	is_alive = true
 
@@ -41,8 +41,6 @@ func _move_random(delta: float) -> void:
 	if wander_timer <= 0:
 		_pick_new_direction()
 
-	# RANDOM: Wander in random direction
-	# 50% speed penalty if player not detected
 	var current_speed = base_speed
 	if not target or not is_instance_valid(target):
 		current_speed = base_speed * 0.5
@@ -56,6 +54,5 @@ func _move_random(delta: float) -> void:
 
 
 func _pick_new_direction() -> void:
-	# Pick random direction and short duration (0.3-0.6 seconds)
 	wander_direction = Vector2.from_angle(randf() * TAU)
 	wander_timer = randf_range(0.3, 0.6)

@@ -26,12 +26,10 @@ const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
 const NEXT_FLOOR_SCENE = preload("res://Scenes/Room/NextFloor.tscn")
 const OBSTACLE_SCENE = preload("res://Scenes/Room/Obstacle.tscn")
 
-# Door texture paths
 const DOOR_LOCKED_PATH = "res://Sprites/Tiles/Forest/door_locked.png"
 const DOOR_OPEN_PATH = "res://Sprites/Tiles/Forest/door_open.png"
 const DOOR_CLOSED_PATH = "res://Sprites/Tiles/Forest/door_closed.png"
 
-# Door textures - loaded via ImageValidator
 static var _door_locked_texture: Texture2D = null
 static var _door_open_texture: Texture2D = null
 static var _door_closed_texture: Texture2D = null
@@ -60,7 +58,7 @@ var locked_doors: Dictionary = {"north": false, "south": false, "east": false, "
 @onready var door_south: Area2D = $Doors/DoorsSouth
 @onready var door_east: Area2D = $Doors/DoorsEast
 @onready var door_west: Area2D = $Doors/DoorsWest
-@onready var player_spawn: Marker2D = $SpawnPoints/PlayerSpawn	
+@onready var player_spawn: Marker2D = $SpawnPoints/PlayerSpawn
 
 
 func _ready() -> void:
@@ -91,7 +89,6 @@ func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
 	door.monitoring = is_active
 	door.monitorable = is_active
 
-	# Disable all collision shapes if door is inactive
 	for child in door.get_children():
 		if child is CollisionShape2D:
 			child.disabled = not is_active
@@ -99,14 +96,12 @@ func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
 	if not is_active:
 		return
 
-	# Add sprite if not already present
 	if not door.has_node("Sprite2D"):
 		var sprite = Sprite2D.new()
 		sprite.name = "Sprite2D"
 		sprite.texture = _get_door_texture(direction)
 		door.add_child(sprite)
 
-	# Connect signal
 	var callback = Callable(self, "_on_door_entered").bind(direction)
 	if not door.body_entered.is_connected(callback):
 		door.body_entered.connect(callback)
@@ -129,11 +124,9 @@ func _on_door_entered(body: Node2D, direction: String) -> void:
 
 	var player = body as Player
 
-	# Check if door is locked and player has key
 	if locked_doors.get(direction, false):
 		if player.keys <= 0:
 			return
-		# Use key to unlock
 		player.keys -= 1
 		locked_doors[direction] = false
 		_update_door_texture(direction)
@@ -179,17 +172,12 @@ func load_from_dict(data: Dictionary) -> void:
 		_:
 			room_type = RoomType.NORMAL
 
-	# Track if item was taken (persisted in floor_grid)
 	item_taken = data.get("item_taken", false)
-
-	# Load locked doors info
 	locked_doors = data.get("locked_doors", {"north": false, "south": false, "east": false, "west": false})
 
-	# Room is cleared if: already marked cleared, is starting room, or has no enemies
 	if data.get("is_cleared", false) or data.get("is_starting_room", false) or enemies_data.is_empty():
 		is_cleared = true
 
-	# ITEM rooms are always cleared (no enemies to fight)
 	if room_type == RoomType.ITEM:
 		is_cleared = true
 
@@ -229,10 +217,10 @@ func spawn_item_pedestal() -> void:
 		return
 
 	item_pedestal = ITEM_PEDESTAL_SCENE.instantiate()
-	item_pedestal.position = player_spawn.position  # Center of room
+	item_pedestal.position = player_spawn.position
 	item_pedestal.item_picked_up.connect(_on_item_picked_up)
 	add_child(item_pedestal)
-	item_pedestal.set_random_item()  # Call after adding to tree so @onready vars are set
+	item_pedestal.set_random_item()
 
 
 func _on_item_picked_up(_item_data: Dictionary) -> void:
@@ -240,7 +228,6 @@ func _on_item_picked_up(_item_data: Dictionary) -> void:
 
 
 func _on_enemy_died(enemy: IEnemy) -> void:
-	# enemy reference may be stale when tree_exited fires
 	if enemy in enemies:
 		enemies.erase(enemy)
 	check_cleared()
@@ -253,7 +240,6 @@ func check_cleared() -> void:
 		_notify_player_room_cleared()
 		_try_spawn_pickup()
 
-		# Spawn next floor portal in boss rooms
 		if room_type == RoomType.BOSS:
 			_spawn_next_floor_portal()
 
@@ -276,13 +262,11 @@ func _spawn_next_floor_portal() -> void:
 
 func _find_clear_spawn_position() -> Vector2:
 	var default_pos = player_spawn.position
-	var obstacle_size = 48.0  # Obstacle (32) + margin (16)
+	var obstacle_size = 48.0
 
-	# Check if default position is clear
 	if _is_position_clear(default_pos, obstacle_size):
 		return default_pos
 
-	# Try positions in expanding circles around center
 	var offsets = [
 		Vector2(64, 0), Vector2(-64, 0), Vector2(0, 64), Vector2(0, -64),
 		Vector2(64, 64), Vector2(-64, 64), Vector2(64, -64), Vector2(-64, -64),
@@ -294,7 +278,6 @@ func _find_clear_spawn_position() -> Vector2:
 		if _is_position_clear(test_pos, obstacle_size):
 			return test_pos
 
-	# Fallback to default if no clear position found
 	return default_pos
 
 
@@ -307,11 +290,9 @@ func _is_position_clear(pos: Vector2, min_distance: float) -> bool:
 
 
 func _try_spawn_pickup() -> void:
-	# 1/3 chance to spawn something
 	if randi() % 3 != 0:
 		return
 
-	# Pick random pickup type (1/3 each: scrap, key, special charge)
 	var pickup_index = randi() % PICKUP_SCENES.size()
 	var pickup = PICKUP_SCENES[pickup_index].instantiate()
 	pickup.position = player_spawn.position
@@ -323,7 +304,6 @@ func _open_doors() -> void:
 
 	for direction in door_directions:
 		var door = door_directions[direction]
-		# Skip locked doors - they stay locked until key is used
 		if locked_doors.get(direction, false):
 			continue
 		if door.visible and door.has_node("Sprite2D"):
@@ -334,7 +314,6 @@ func get_spawn_position(from_direction: String = "") -> Vector2:
 	if from_direction.is_empty():
 		return player_spawn.global_position
 
-	# Spawn player at the door they entered from (offset into the room)
 	match from_direction:
 		"north":
 			return door_north.global_position + Vector2(0, 50)
@@ -349,22 +328,17 @@ func get_spawn_position(from_direction: String = "") -> Vector2:
 
 
 func _setup_navigation() -> void:
-	# Create NavigationRegion2D for pathfinding
 	var nav_region = NavigationRegion2D.new()
 	nav_region.name = "NavigationRegion"
 
-	# Create navigation polygon covering walkable floor area
 	var nav_poly = NavigationPolygon.new()
 
-	# Define room bounds (based on Room.tscn boundaries)
-	# Inset slightly from walls to prevent pathing into them
 	var margin = 20.0
 	var min_x = -350.0 + margin
 	var max_x = 390.0 - margin
 	var min_y = -270.0 + margin
 	var max_y = 260.0 - margin
 
-	# Outer boundary (clockwise winding)
 	var outer_outline = PackedVector2Array([
 		Vector2(min_x, min_y),
 		Vector2(max_x, min_y),
@@ -373,13 +347,11 @@ func _setup_navigation() -> void:
 	])
 	nav_poly.add_outline(outer_outline)
 
-	# Add holes for each obstacle (counter-clockwise winding)
-	var obstacle_margin = 20.0  # Extra margin around obstacles for pathfinding
-	var obstacle_half_size = 16.0 + obstacle_margin  # 32/2 + margin
+	var obstacle_margin = 20.0
+	var obstacle_half_size = 16.0 + obstacle_margin
 
 	for obs in obstacles:
 		var pos = Vector2(obs[0], obs[1])
-		# Counter-clockwise winding for holes
 		var hole = PackedVector2Array([
 			Vector2(pos.x - obstacle_half_size, pos.y - obstacle_half_size),
 			Vector2(pos.x - obstacle_half_size, pos.y + obstacle_half_size),
@@ -388,13 +360,10 @@ func _setup_navigation() -> void:
 		])
 		nav_poly.add_outline(hole)
 
-	# Bake the navigation mesh using NavigationServer2D
 	var source_geometry = NavigationMeshSourceGeometryData2D.new()
 
-	# Add traversable area (outer boundary)
 	source_geometry.add_traversable_outline(outer_outline)
 
-	# Add obstruction outlines for each obstacle
 	for obs in obstacles:
 		var pos = Vector2(obs[0], obs[1])
 		var obstruction = PackedVector2Array([
@@ -410,5 +379,4 @@ func _setup_navigation() -> void:
 	nav_region.navigation_polygon = nav_poly
 	add_child(nav_region)
 
-	# Move to back so it doesn't interfere with rendering
 	move_child(nav_region, 0)

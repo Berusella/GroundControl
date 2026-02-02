@@ -6,14 +6,12 @@ class_name BossVietnamHorror
 const SPRITE_PATH = "res://Sprites/Characters/Enemies/boss_vietnam_horror.png"
 const BURNING_PATCH_SCENE = preload("res://Scenes/Projectiles/BurningPatch.tscn")
 
-# Burning patch
 var burn_timer: float = 0.0
 var burn_interval: float = 0.5
 
-# Speed phases
-var base_speed: float = 100.0  # speed 1
-var enraged_speed: float = 150.0  # speed 1.5
-var enrage_threshold: float = 0.4  # 40% hp
+var base_speed: float = 150.0
+var enraged_speed: float = 225.0
+var enrage_threshold: float = 0.4
 var is_enraged: bool = false
 
 
@@ -40,7 +38,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_check_enrage()
-	_handle_dash_movement(delta)
+	_handle_movement(delta)
 	_handle_burning(delta)
 
 
@@ -54,18 +52,18 @@ func _check_enrage() -> void:
 		speed = enraged_speed
 
 
-func _handle_dash_movement(delta: float) -> void:
+func _handle_movement(delta: float) -> void:
 	if not pathfinder:
 		_move_toward_target()
 		return
 
+	pathfinder.set_target(target)
 	pathfinder.update_dash(delta, speed)
 	pathfinder.try_start_dash()
 
-	if pathfinder:
-		pathfinder.set_target(target)
-		var speed_mult = pathfinder.get_speed_multiplier()
-		velocity = pathfinder.get_movement_direction() * speed * speed_mult
+	var direction = pathfinder.get_movement_direction()
+	var speed_mult = pathfinder.get_speed_multiplier()
+	velocity = direction * speed * speed_mult
 
 	move_and_slide()
 
