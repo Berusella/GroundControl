@@ -60,21 +60,21 @@ func _add_special_rooms() -> void:
 	_item_pos = Vector2i(-1, -1)
 
 	# Find any valid adjacent position for boss room
-	_boss_pos = _find_any_adjacent_slot([])
+	_boss_pos = _find_any_adjacent_slot([], false)
 	if _boss_pos != Vector2i(-1, -1):
 		_positions.append(_boss_pos)
 
-	# Find any valid adjacent position for item room (excluding boss)
+	# Find dead-end position for item room (single door only in templates)
 	var excluded: Array[Vector2i] = []
 	if _boss_pos != Vector2i(-1, -1):
 		excluded.append(_boss_pos)
 
-	_item_pos = _find_any_adjacent_slot(excluded)
+	_item_pos = _find_any_adjacent_slot(excluded, true)
 	if _item_pos != Vector2i(-1, -1):
 		_positions.append(_item_pos)
 
 
-func _find_any_adjacent_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
+func _find_any_adjacent_slot(excluded_positions: Array[Vector2i], dead_end_only: bool = false) -> Vector2i:
 	var candidates: Array[Vector2i] = []
 	var directions = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 
@@ -91,6 +91,16 @@ func _find_any_adjacent_slot(excluded_positions: Array[Vector2i]) -> Vector2i:
 				continue
 			if candidate in excluded_positions:
 				continue
+
+			# If dead_end_only, check that candidate only has one neighbor
+			if dead_end_only:
+				var neighbor_count = 0
+				for check_dir in directions:
+					var neighbor = candidate + check_dir
+					if neighbor in _positions and neighbor not in excluded_positions:
+						neighbor_count += 1
+				if neighbor_count != 1:
+					continue
 
 			candidates.append(candidate)
 
