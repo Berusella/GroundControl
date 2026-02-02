@@ -29,7 +29,7 @@ func _setup_collision() -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is Player:
-		_go_to_next_floor()
+		call_deferred("_go_to_next_floor")
 
 
 func _go_to_next_floor() -> void:
