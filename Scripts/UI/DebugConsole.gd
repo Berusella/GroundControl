@@ -339,9 +339,11 @@ func _cmd_item(args: String) -> void:
 		return
 
 	var pedestal = ITEM_PEDESTAL_SCENE.instantiate()
+	get_tree().current_scene.add_child(pedestal)
+
+	# Set position after adding to tree
 	var spawn_offset = Vector2(80, 0)
 	pedestal.global_position = player.global_position + spawn_offset
-	get_tree().current_scene.add_child(pedestal)
 
 	if args.is_empty():
 		# Random item

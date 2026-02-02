@@ -75,6 +75,11 @@ func _spawn_item() -> void:
 	item = Item.new()
 	item.initialize(item_data)
 
+	# Set collision to detect player (layer 1)
+	item.collision_layer = 0
+	item.collision_mask = 1
+	item.monitoring = true
+
 	# Create collision shape for pickup
 	var collision = CollisionShape2D.new()
 	var shape = CircleShape2D.new()
