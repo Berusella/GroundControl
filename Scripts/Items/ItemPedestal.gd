@@ -99,15 +99,8 @@ func _spawn_item() -> void:
 
 
 func _get_item_sprite_path() -> String:
-	# Try item-specific texture first, then default
-	# ImageValidator will fall back to error_image if neither exists
-	var item_id = item_data.get("id", 0)
-	var specific_path = "res://Sprites/Items/item_%d.png" % item_id
-	if ResourceLoader.exists(specific_path):
-		return specific_path
-
-	# Return default path - ImageValidator handles missing files
-	return "res://Sprites/Items/item_default.png"
+	var sprite_name = item_data.get("sprite", "")
+	return "res://Sprites/Items/" + sprite_name
 
 
 func _on_item_picked_up(body: Node2D) -> void:

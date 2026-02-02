@@ -3,6 +3,7 @@
 		{
 			"id": 0,
 			"name": "Tactical Supply",
+			"sprite": "tactical_supply.png",
 			"rarity": 1,
 			"special": null,
 			"stats": { "hp": 1, "keys": 1 },
@@ -12,6 +13,7 @@
 		{
 			"id": 1,
 			"name": "Live to See Another Day",
+			"sprite": "live_to_see_another_day.png",
 			"rarity": 3,
 			"special": null,
 			"stats": { "extra_lives": 1 },
@@ -21,6 +23,7 @@
 		{
 			"id": 2,
 			"name": "Tactical Nuke",
+			"sprite": "tactical_nuke.png",
 			"rarity": 4,
 			"special": "BIG BOOM",
 			"stats": { "power": 2 },
@@ -30,6 +33,7 @@
 		{
 			"id": 3,
 			"name": "Government Propaganda",
+			"sprite": "goverment_propaganda.png",
 			"rarity": 4,
 			"special": "MIND CONTROL",
 			"stats": { "hp": 2 },
@@ -39,6 +43,7 @@
 		{
 			"id": 4,
 			"name": "Its Time to Stop",
+			"sprite": "its_time_to_stop.png",
 			"rarity": 3,
 			"special": "TIME STOP",
 			"stats": null,
@@ -48,6 +53,7 @@
 		{
 			"id": 5,
 			"name": "The Carrier",
+			"sprite": "the_carrier.png",
 			"rarity": 4,
 			"special": "ASCEND",
 			"stats": null,
@@ -57,6 +63,7 @@
 		{
 			"id": 6,
 			"name": "GRENADE",
+			"sprite": "grenade.png",
 			"rarity": 2,
 			"special": "BIG BOOM",
 			"stats": null,
@@ -66,6 +73,7 @@
 		{
 			"id": 7,
 			"name": "Overcharge",
+			"sprite": "overcharge.png",
 			"rarity": 3,
 			"special": "SPEED SHOT",
 			"stats": { "speed": 20 },
@@ -75,6 +83,7 @@
 		{
 			"id": 8,
 			"name": "Steroids",
+			"sprite": "steroids.png",
 			"rarity": 3,
 			"special": null,
 			"stats": { "power": 1, "speed": 20 },
@@ -84,6 +93,7 @@
 		{
 			"id": 9,
 			"name": "PERFECT DISGUISE",
+			"sprite": "perfect_disguise.png",
 			"rarity": 3,
 			"special": "COPY",
 			"stats": null,
@@ -93,6 +103,7 @@
 		{
 			"id": 10,
 			"name": "Healing Salve",
+			"sprite": "healing_salve.png",
 			"rarity": 1,
 			"special": null,
 			"stats": { "hp": 1 },
@@ -102,6 +113,7 @@
 		{
 			"id": 11,
 			"name": "Sezam",
+			"sprite": "sezam.png",
 			"rarity": 1,
 			"special": null,
 			"stats": { "keys": 3 },
@@ -111,6 +123,7 @@
 		{
 			"id": 12,
 			"name": "Brain Rot",
+			"sprite": "brain_rot.png",
 			"rarity": 2,
 			"special": "INVERT",
 			"stats": null,
@@ -120,6 +133,7 @@
 		{
 			"id": 13,
 			"name": "Training Camp",
+			"sprite": "training_camp.png",
 			"rarity": 3,
 			"special": "PEW PEW",
 			"stats": { "hp": 3, "power": 3, "speed": 40, "fire_rate": 2 },
@@ -129,6 +143,7 @@
 		{
 			"id": 14,
 			"name": "Plasma Gun",
+			"sprite": "plasma_gun.png",
 			"rarity": 3,
 			"special": null,
 			"stats": null,
@@ -138,6 +153,7 @@
 		{
 			"id": 15,
 			"name": "Gattling Gun",
+			"sprite": "gattling_gun.png",
 			"rarity": 4,
 			"special": "SPEED SHOT",
 			"stats": null,
@@ -147,6 +163,7 @@
 		{
 			"id": 16,
 			"name": "Dual Wielding",
+			"sprite": "dual_wielding.png",
 			"rarity": 4,
 			"special": null,
 			"stats": { "power": -1, "fire_rate": -1 },
@@ -156,6 +173,7 @@
 		{
 			"id": 17,
 			"name": "Warship Turret",
+			"sprite": "warship_turret.png",
 			"rarity": 2,
 			"special": null,
 			"stats": { "fire_rate": 1 },
@@ -165,6 +183,7 @@
 		{
 			"id": 18,
 			"name": "Super Reload Guy",
+			"sprite": "super_reload_guy.png",
 			"rarity": 3,
 			"special": null,
 			"stats": { "fire_rate": 4 },
@@ -174,6 +193,7 @@
 		{
 			"id": 19,
 			"name": "Football",
+			"sprite": "football.png",
 			"rarity": 3,
 			"special": null,
 			"stats": null,
@@ -183,6 +203,7 @@
 		{
 			"id": 20,
 			"name": "Government Budget",
+			"sprite": "government_budget.png",
 			"rarity": 2,
 			"special": null,
 			"stats": { "power": 2 },
@@ -192,6 +213,7 @@
 		{
 			"id": 21,
 			"name": "THE SPOON",
+			"sprite": "the_spoon.png",
 			"rarity": 1,
 			"special": null,
 			"stats": { "speed": 20 },
@@ -201,6 +223,7 @@
 		{
 			"id": 22,
 			"name": "Patched Hull",
+			"sprite": "patched_hull.png",
 			"rarity": 2,
 			"special": null,
 			"stats": { "hp": 2 },
@@ -210,6 +233,7 @@
 		{
 			"id": 23,
 			"name": "Pain in the $$$",
+			"sprite": "pain_in_the_money.png",
 			"rarity": 2,
 			"special": null,
 			"stats": { "speed": 80 },
@@ -219,6 +243,7 @@
 		{
 			"id": 24,
 			"name": "Know Where It Is",
+			"sprite": "know_where_it_is.png",
 			"rarity": 3,
 			"special": null,
 			"stats": null,
