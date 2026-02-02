@@ -200,6 +200,10 @@ func _process(delta: float) -> void:
 	# Handle spawn delay countdown
 	_process_spawn_delay(delta)
 
+	# Don't allow any action during spawn delay
+	if is_spawning:
+		return
+
 	# Player-controlled movement
 	if not is_player_controlled:
 		return

@@ -25,6 +25,16 @@ const ENEMY_SCENES = {
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
 const NEXT_FLOOR_SCENE = preload("res://Scenes/Room/NextFloor.tscn")
 
+# Door texture paths
+const DOOR_LOCKED_PATH = "res://Sprites/Tiles/Forest/door_locked.png"
+const DOOR_OPEN_PATH = "res://Sprites/Tiles/Forest/door_open.png"
+const DOOR_CLOSED_PATH = "res://Sprites/Tiles/Forest/door_closed.png"
+
+# Door textures - loaded via ImageValidator
+static var _door_locked_texture: Texture2D = null
+static var _door_open_texture: Texture2D = null
+static var _door_closed_texture: Texture2D = null
+
 const PICKUP_SCENES = [
 	preload("res://Scenes/Pickups/ScrapPickup.tscn"),
 	preload("res://Scenes/Pickups/KeyPickup.tscn"),
@@ -43,6 +53,7 @@ var enemies: Array[IEnemy] = []
 var is_cleared: bool = false
 var item_taken: bool = false
 var item_pedestal: Node2D = null
+var locked_doors: Dictionary = {"north": false, "south": false, "east": false, "west": false}
 
 @onready var door_north: Area2D = $Doors/DoorsNorth
 @onready var door_south: Area2D = $Doors/DoorsSouth
@@ -53,8 +64,18 @@ var item_pedestal: Node2D = null
 
 func _ready() -> void:
 	add_to_group("room")
+	_load_door_textures()
 	_setup_doors()
 	_setup_navigation()
+
+
+static func _load_door_textures() -> void:
+	if _door_locked_texture == null:
+		_door_locked_texture = load(ImageValidator.get_valid_path(DOOR_LOCKED_PATH))
+	if _door_open_texture == null:
+		_door_open_texture = load(ImageValidator.get_valid_path(DOOR_OPEN_PATH))
+	if _door_closed_texture == null:
+		_door_closed_texture = load(ImageValidator.get_valid_path(DOOR_CLOSED_PATH))
 
 
 func _setup_doors() -> void:
@@ -79,9 +100,9 @@ func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
 
 	# Add sprite if not already present
 	if not door.has_node("Sprite2D"):
-		var door_texture = "res://Sprites/Tiles/Forest/door_open.png" if is_cleared else "res://Sprites/Tiles/Forest/door_closed.png"
-		var sprite = SpriteFactory.create(door_texture)
+		var sprite = Sprite2D.new()
 		sprite.name = "Sprite2D"
+		sprite.texture = _get_door_texture(direction)
 		door.add_child(sprite)
 
 	# Connect signal
@@ -90,9 +111,53 @@ func _setup_door(door: Area2D, is_active: bool, direction: String) -> void:
 		door.body_entered.connect(callback)
 
 
+func _get_door_texture(direction: String) -> Texture2D:
+	if locked_doors.get(direction, false):
+		return _door_locked_texture
+	elif is_cleared:
+		return _door_open_texture
+	else:
+		return _door_closed_texture
+
+
 func _on_door_entered(body: Node2D, direction: String) -> void:
-	if body is Player and is_cleared:
-		door_entered.emit(direction)
+	if not body is Player:
+		return
+	if not is_cleared:
+		return
+
+	var player = body as Player
+
+	# Check if door is locked and player has key
+	if locked_doors.get(direction, false):
+		if player.keys <= 0:
+			return
+		# Use key to unlock
+		player.keys -= 1
+		locked_doors[direction] = false
+		_update_door_texture(direction)
+
+	door_entered.emit(direction)
+
+
+func _update_door_texture(direction: String) -> void:
+	var door = _get_door_by_direction(direction)
+	if door and door.has_node("Sprite2D"):
+		var sprite = door.get_node("Sprite2D")
+		sprite.texture = _get_door_texture(direction)
+
+
+func _get_door_by_direction(direction: String) -> Area2D:
+	match direction:
+		"north":
+			return door_north
+		"south":
+			return door_south
+		"east":
+			return door_east
+		"west":
+			return door_west
+	return null
 
 
 func load_from_dict(data: Dictionary) -> void:
@@ -115,6 +180,9 @@ func load_from_dict(data: Dictionary) -> void:
 
 	# Track if item was taken (persisted in floor_grid)
 	item_taken = data.get("item_taken", false)
+
+	# Load locked doors info
+	locked_doors = data.get("locked_doors", {"north": false, "south": false, "east": false, "west": false})
 
 	# Room is cleared if: already marked cleared, is starting room, or has no enemies
 	if data.get("is_cleared", false) or data.get("is_starting_room", false) or enemies_data.is_empty():
@@ -169,7 +237,9 @@ func _on_item_picked_up(_item_data: Dictionary) -> void:
 
 
 func _on_enemy_died(enemy: IEnemy) -> void:
-	enemies.erase(enemy)
+	# enemy reference may be stale when tree_exited fires
+	if enemy in enemies:
+		enemies.erase(enemy)
 	check_cleared()
 
 
@@ -214,13 +284,15 @@ func _try_spawn_pickup() -> void:
 
 
 func _open_doors() -> void:
-	var doors = [door_north, door_south, door_east, door_west]
-	var open_texture_path = ImageValidator.get_valid_path("res://Sprites/Tiles/Forest/door_open.png")
-	var open_texture = load(open_texture_path)
+	var door_directions = {"north": door_north, "south": door_south, "east": door_east, "west": door_west}
 
-	for door in doors:
+	for direction in door_directions:
+		var door = door_directions[direction]
+		# Skip locked doors - they stay locked until key is used
+		if locked_doors.get(direction, false):
+			continue
 		if door.visible and door.has_node("Sprite2D"):
-			door.get_node("Sprite2D").texture = open_texture
+			door.get_node("Sprite2D").texture = _door_open_texture
 
 
 func get_spawn_position(from_direction: String = "") -> Vector2:

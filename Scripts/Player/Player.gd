@@ -22,6 +22,17 @@ const SPECIAL_COOLDOWNS = {
 	"MIND CONTROL": 5, "TIME STOP": 4, "SPEED SHOT": 6, "COPY": 3
 }
 
+# Special ability constants
+const BIG_BOOM_RADIUS: float = 150.0
+const BIG_BOOM_DAMAGE_MULTIPLIER: int = 10
+const SPEED_SHOT_FIRE_RATE: float = 10.0
+const SPEED_SHOT_DURATION: float = 1.0
+const TIME_STOP_DURATION: float = 10.0
+const INVERT_DURATION: float = 10.0
+const MIND_CONTROL_DURATION: float = 5.0
+const PEW_PEW_SCALE: float = 3.0
+const PEW_PEW_DAMAGE_MULTIPLIER: float = 1.5
+
 var keys: int = 0
 var sprite: Sprite2D = null
 
@@ -86,6 +97,7 @@ func _setup_stats() -> void:
 	speed = 150
 	power = 3
 	is_alive = true
+	keys = 1
 
 
 func _setup_sprite() -> void:
@@ -197,8 +209,9 @@ func die() -> void:
 		return
 
 	is_alive = false
-	player_died.emit(collected_items)
-	queue_free()
+	var items_copy = collected_items.duplicate()
+	player_died.emit(items_copy)
+	call_deferred("queue_free")
 
 
 func apply_item(item_data: Dictionary) -> void:
@@ -322,13 +335,12 @@ func _perform_special(special_name: String) -> void:
 
 
 func _special_big_boom() -> void:
-	# Deal 10x player damage to enemies within radius around player
-	var boom_radius: float = 150.0
-	var boom_damage: int = power * 10
+	# Deal damage to enemies within radius around player
+	var boom_damage: int = power * BIG_BOOM_DAMAGE_MULTIPLIER
 
 	# Spawn explosion visual
 	var explosion = EXPLOSION_SCENE.instantiate()
-	explosion.radius = boom_radius
+	explosion.radius = BIG_BOOM_RADIUS
 	explosion.global_position = global_position
 	get_tree().current_scene.add_child(explosion)
 
@@ -337,7 +349,7 @@ func _special_big_boom() -> void:
 
 	for enemy in enemies:
 		var distance = global_position.distance_to(enemy.global_position)
-		if distance <= boom_radius:
+		if distance <= BIG_BOOM_RADIUS:
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(boom_damage)
 				hit_count += 1
@@ -418,19 +430,18 @@ func _end_copy() -> void:
 
 
 func _special_pew_pew() -> void:
-	# Shoot a projectile at 1.5x damage, 3x scale
+	# Shoot a scaled projectile with bonus damage
 	var shoot_direction = _get_shoot_direction()
 	if shoot_direction == Vector2.ZERO:
-		# Default to facing right if no direction input
 		shoot_direction = Vector2.RIGHT
 
 	var projectile = projectile_scene.instantiate()
 	var spawn_offset = shoot_direction * 20.0
 	projectile.global_position = global_position + spawn_offset
 	projectile.lifetime = shot_range
-	projectile.scale = Vector2(3.0, 3.0)
+	projectile.scale = Vector2(PEW_PEW_SCALE, PEW_PEW_SCALE)
 	projectile.initialize(self, shoot_direction, velocity)
-	projectile.damage = int(power * 1.5)  # Override damage to 1.5x
+	projectile.damage = int(power * PEW_PEW_DAMAGE_MULTIPLIER)
 	get_tree().current_scene.add_child(projectile)
 	print("PEW PEW! Fired projectile with %d damage" % projectile.damage)
 
@@ -444,15 +455,15 @@ func _special_ascend() -> void:
 
 
 func _special_speed_shot() -> void:
-	# Set fire rate to 10 for 1 second
+	# Temporarily boost fire rate
 	original_fire_rate = fire_rate
-	fire_rate = 10.0
-	active_effects["SPEED SHOT"] = 1.0
-	print("SPEED SHOT! Fire rate boosted to 10 for 1 second")
+	fire_rate = SPEED_SHOT_FIRE_RATE
+	active_effects["SPEED SHOT"] = SPEED_SHOT_DURATION
+	print("SPEED SHOT! Fire rate boosted to %.0f for %.1f second" % [SPEED_SHOT_FIRE_RATE, SPEED_SHOT_DURATION])
 
 
 func _special_time_stop() -> void:
-	# Freeze enemies and their projectiles for 10 seconds
+	# Freeze enemies and their projectiles
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		enemy.set_physics_process(false)
@@ -462,8 +473,8 @@ func _special_time_stop() -> void:
 		if proj is IProjectile and proj.owner_node != self:
 			proj.set_physics_process(false)
 
-	active_effects["TIME STOP"] = 10.0
-	print("TIME STOP! Enemies and projectiles frozen for 10 seconds")
+	active_effects["TIME STOP"] = TIME_STOP_DURATION
+	print("TIME STOP! Enemies and projectiles frozen for %.0f seconds" % TIME_STOP_DURATION)
 
 
 func _special_mind_control() -> void:
@@ -473,12 +484,15 @@ func _special_mind_control() -> void:
 		print("MIND CONTROL failed - no enemies to control")
 		return
 
-	# Pick the nearest enemy
+	# Pick the nearest enemy that's not spawning
 	var nearest_enemy: IEnemy = null
 	var nearest_dist: float = INF
 
 	for enemy in enemies:
 		if enemy is IEnemy:
+			# Skip enemies still in spawn delay
+			if enemy.is_spawning:
+				continue
 			var dist = global_position.distance_to(enemy.global_position)
 			if dist < nearest_dist:
 				nearest_dist = dist
@@ -487,8 +501,7 @@ func _special_mind_control() -> void:
 	if nearest_enemy:
 		controlled_enemy = nearest_enemy
 		nearest_enemy.set_player_controlled(true)
-		# 5 seconds for regular enemies, could extend for bosses
-		active_effects["MIND CONTROL"] = 5.0
+		active_effects["MIND CONTROL"] = MIND_CONTROL_DURATION
 		print("MIND CONTROL! Controlling enemy at distance %.1f" % nearest_dist)
 	else:
 		print("MIND CONTROL failed - no valid enemy found")
@@ -523,8 +536,8 @@ func _special_invert() -> void:
 			if enemy.invert_movement():
 				inverted_count += 1
 
-	active_effects["INVERT"] = 10.0
-	print("INVERT! Swapped movement for %d enemies (10 seconds)" % inverted_count)
+	active_effects["INVERT"] = INVERT_DURATION
+	print("INVERT! Swapped movement for %d enemies (%.0f seconds)" % [inverted_count, INVERT_DURATION])
 
 
 func _restore_enemy_movements() -> void:

@@ -7,6 +7,7 @@ const HUD_SCENE = preload("res://Scenes/UI/HUD.tscn")
 const DEBUG_CONSOLE_SCENE = preload("res://Scenes/UI/DebugConsole.tscn")
 const ITEM_POPUP_SCENE = preload("res://Scenes/UI/ItemPopup.tscn")
 const GAME_OVER_SCENE = preload("res://Scenes/UI/GameOver.tscn")
+const MAIN_MENU_SCENE = preload("res://Scenes/UI/MainMenu.tscn")
 const ROOMS_DATA_PATH = "res://data/rooms.json"
 
 var player: Player = null
@@ -16,9 +17,31 @@ var hud: HUD = null
 var debug_console: DebugConsole = null
 var item_popup: ItemPopup = null
 var game_over: GameOver = null
+var main_menu: MainMenu = null
 
 
 func _ready() -> void:
+	_create_main_menu()
+
+
+func _create_main_menu() -> void:
+	main_menu = MAIN_MENU_SCENE.instantiate()
+	add_child(main_menu)
+	main_menu.new_run_pressed.connect(_on_new_run_pressed)
+	main_menu.exit_pressed.connect(_on_menu_exit_pressed)
+
+
+func _on_new_run_pressed() -> void:
+	main_menu.queue_free()
+	main_menu = null
+	_start_game()
+
+
+func _on_menu_exit_pressed() -> void:
+	get_tree().quit()
+
+
+func _start_game() -> void:
 	_setup_room_loader()
 	_create_player()
 	_setup_floor_manager()
@@ -51,10 +74,8 @@ func _create_hud() -> void:
 
 
 func _create_debug_console() -> void:
-	print("DEBUG: Creating debug console...")
 	debug_console = DEBUG_CONSOLE_SCENE.instantiate()
 	add_child(debug_console)
-	print("DEBUG: Debug console added to scene tree")
 
 
 func _create_item_popup() -> void:

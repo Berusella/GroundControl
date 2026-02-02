@@ -47,10 +47,15 @@ func _load_room_at_position(pos: Vector2i, from_direction: String = "") -> Room:
 	if _current_room:
 		_floor_grid[_current_position]["is_cleared"] = _current_room.is_cleared
 		_floor_grid[_current_position]["item_taken"] = _current_room.item_taken
+		_floor_grid[_current_position]["locked_doors"] = _current_room.locked_doors.duplicate()
 		_current_room.door_entered.disconnect(_on_door_entered)
 		_current_room.queue_free()
 
-	var room_data = _floor_grid[pos]
+	var room_data = _floor_grid[pos].duplicate()
+
+	# Determine which doors lead to item rooms (should be locked)
+	room_data["locked_doors"] = _get_locked_doors(pos)
+
 	_current_room = _room_loader.create_room(room_data)
 	_current_position = pos
 
@@ -130,10 +135,35 @@ func _clear_all_projectiles() -> void:
 		projectile.queue_free()
 
 
+func _get_locked_doors(pos: Vector2i) -> Dictionary:
+	# Check if locked_doors state was already saved (door was unlocked with key)
+	if _floor_grid[pos].has("locked_doors"):
+		return _floor_grid[pos]["locked_doors"].duplicate()
+
+	# Generate initial locked doors based on adjacent item rooms
+	var locked = {"north": false, "south": false, "east": false, "west": false}
+	var directions = {
+		"north": Vector2i.UP,
+		"south": Vector2i.DOWN,
+		"east": Vector2i.RIGHT,
+		"west": Vector2i.LEFT
+	}
+
+	for dir_name in directions:
+		var adjacent_pos = pos + directions[dir_name]
+		if adjacent_pos in _floor_grid:
+			var adjacent_room = _floor_grid[adjacent_pos]
+			if adjacent_room.get("room_type", "Normal") == "Item":
+				locked[dir_name] = true
+
+	return locked
+
+
 func go_to_next_floor() -> void:
 	# Clear current room
-	if _current_room:
-		_current_room.door_entered.disconnect(_on_door_entered)
+	if _current_room and is_instance_valid(_current_room):
+		if _current_room.door_entered.is_connected(_on_door_entered):
+			_current_room.door_entered.disconnect(_on_door_entered)
 		_current_room.queue_free()
 		_current_room = null
 

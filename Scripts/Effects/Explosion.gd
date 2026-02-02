@@ -20,6 +20,10 @@ func _setup_sprite() -> void:
 	sprite = SpriteFactory.create(SPRITE_PATH)
 	add_child(sprite)
 
+	if not sprite.texture:
+		push_warning("Explosion texture not found: " + SPRITE_PATH)
+		return
+
 	# Scale sprite to match radius (diameter = radius * 2)
 	var texture_size = sprite.texture.get_size()
 	var target_diameter = radius * 2
