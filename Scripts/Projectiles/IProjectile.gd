@@ -31,6 +31,7 @@ func _exit_tree() -> void:
 func _setup_sprite() -> void:
 	if not sprite_path.is_empty():
 		sprite = SpriteFactory.create_and_attach(self, sprite_path)
+		sprite.scale = Vector2(2, 2)
 
 
 func _start_lifetime_timer() -> void:
