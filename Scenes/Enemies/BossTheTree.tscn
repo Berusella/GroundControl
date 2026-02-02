@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Scripts/Enemies/BossTheTree.gd" id="1_boss"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_boss"]
-radius = 24.0
+radius = 40.0
 
 [node name="BossTheTree" type="CharacterBody2D"]
 z_index = 2
