@@ -25,6 +25,8 @@ const PROJECTILE_SCENES = {
 	"laser": preload("res://Scenes/Projectiles/ProjectileLaser.tscn")
 }
 
+const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
+
 # Map console-friendly names to actual special ability names
 const SPECIAL_ABILITIES = {
 	"pew_pew": "PEW PEW",
@@ -143,6 +145,8 @@ func _execute_command(command: String) -> void:
 			_cmd_teleport(args)
 		"teleport":
 			_cmd_teleport(args)
+		"item":
+			_cmd_item(args)
 		_:
 			_log("Unknown command: " + cmd)
 			_log("Type 'help' for available commands")
@@ -328,6 +332,32 @@ func _cmd_teleport(args: String) -> void:
 	_log("Teleported to " + target_type + " room at " + str(target_pos))
 
 
+func _cmd_item(args: String) -> void:
+	var player = _get_player()
+	if not player:
+		_log("Error: Player not found")
+		return
+
+	var pedestal = ITEM_PEDESTAL_SCENE.instantiate()
+	var spawn_offset = Vector2(80, 0)
+	pedestal.global_position = player.global_position + spawn_offset
+	get_tree().current_scene.add_child(pedestal)
+
+	if args.is_empty():
+		# Random item
+		pedestal.set_random_item()
+		_log("Spawned item pedestal with random item")
+	elif args.is_valid_int():
+		# Specific item by ID
+		var item_id = int(args)
+		pedestal.set_item_by_id(item_id)
+		_log("Spawned item pedestal with item ID: " + str(item_id))
+	else:
+		# Try to find by name
+		pedestal.set_item_by_name(args)
+		_log("Spawned item pedestal with item: " + args)
+
+
 func _cmd_help() -> void:
 	_log("=== Debug Console Commands ===")
 	_log("spawn enemy:<type> - Spawn enemy near player")
@@ -343,6 +373,7 @@ func _cmd_help() -> void:
 	_log("range [value] - Set/show projectile range (lifetime)")
 	_log("firerate [value] - Set/show fire rate (shots/sec)")
 	_log("tp <type> - Teleport to room (item, boss)")
+	_log("item [id/name] - Spawn item pedestal (random if no arg)")
 	_log("clear - Clear console")
 	_log("help - Show this help")
 
