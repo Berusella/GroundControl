@@ -81,7 +81,9 @@ func _execute_swipe() -> void:
 	var to_player = target.global_position - global_position
 	var distance = to_player.length()
 
-	if distance > swipe_range:
+	# Account for node scale in range check
+	var actual_range = swipe_range * scale.x
+	if distance > actual_range:
 		return
 
 	var angle_to_player = rad_to_deg(swipe_direction.angle_to(to_player.normalized()))
