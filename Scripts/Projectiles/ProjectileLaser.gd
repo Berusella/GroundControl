@@ -29,6 +29,9 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	# Restore lifetime before super._ready() starts the timer
+	lifetime = 999.0
+
 	super._ready()
 	add_to_group("laser_projectile")
 
