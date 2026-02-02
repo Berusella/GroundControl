@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cspecialcharge1"]
+
+[ext_resource type="Script" path="res://Scripts/Pickups/SpecialChargePickup.gd" id="1_special"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_special"]
+radius = 10.0
+
+[node name="SpecialChargePickup" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_special")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_special")

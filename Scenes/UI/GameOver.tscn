@@ -1,0 +1,63 @@
+[gd_scene format=3 uid="uid://lbbhuukfgqwa"]
+
+[ext_resource type="Script" uid="uid://j8g1jlhx0iy4" path="res://Scripts/UI/GameOver.gd" id="1_gameover"]
+
+[node name="GameOver" type="CanvasLayer" unique_id=612586727]
+layer = 10
+script = ExtResource("1_gameover")
+
+[node name="Panel" type="Panel" parent="." unique_id=1510001893]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=681782875]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 30.0
+offset_right = -50.0
+offset_bottom = -30.0
+theme_override_constants/separation = 15
+
+[node name="GameOverLabel" type="Label" parent="Panel/VBoxContainer" unique_id=1528573645]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "GAME OVER"
+horizontal_alignment = 1
+
+[node name="ItemsLabel" type="Label" parent="Panel/VBoxContainer" unique_id=13504551]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Items Collected:"
+horizontal_alignment = 1
+
+[node name="ItemsScroll" type="ScrollContainer" parent="Panel/VBoxContainer" unique_id=147880712]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemsContainer" type="VBoxContainer" parent="Panel/VBoxContainer/ItemsScroll" unique_id=1085473677]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="Spacer" type="Control" parent="Panel/VBoxContainer" unique_id=1206172883]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RestartButton" type="Button" parent="Panel/VBoxContainer" unique_id=1104824027]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "Restart"
+
+[node name="ExitButton" type="Button" parent="Panel/VBoxContainer" unique_id=2074917708]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "Exit"

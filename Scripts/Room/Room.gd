@@ -25,6 +25,12 @@ const ENEMY_SCENES = {
 const ITEM_PEDESTAL_SCENE = preload("res://Scenes/Items/ItemPedestal.tscn")
 const NEXT_FLOOR_SCENE = preload("res://Scenes/Room/NextFloor.tscn")
 
+const PICKUP_SCENES = [
+	preload("res://Scenes/Pickups/ScrapPickup.tscn"),
+	preload("res://Scenes/Pickups/KeyPickup.tscn"),
+	preload("res://Scenes/Pickups/SpecialChargePickup.tscn")
+]
+
 var id: int = 0
 var room_type: RoomType = RoomType.NORMAL
 var north: bool = false
@@ -172,6 +178,7 @@ func check_cleared() -> void:
 		is_cleared = true
 		_open_doors()
 		_notify_player_room_cleared()
+		_try_spawn_pickup()
 
 		# Spawn next floor portal in boss rooms
 		if room_type == RoomType.BOSS:
@@ -179,6 +186,8 @@ func check_cleared() -> void:
 
 
 func _notify_player_room_cleared() -> void:
+	if not is_inside_tree():
+		return
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		var player = players[0]
@@ -190,6 +199,18 @@ func _spawn_next_floor_portal() -> void:
 	var portal = NEXT_FLOOR_SCENE.instantiate()
 	portal.position = player_spawn.position  # Center of room
 	add_child(portal)
+
+
+func _try_spawn_pickup() -> void:
+	# 1/3 chance to spawn something
+	if randi() % 3 != 0:
+		return
+
+	# Pick random pickup type (1/3 each: scrap, key, special charge)
+	var pickup_index = randi() % PICKUP_SCENES.size()
+	var pickup = PICKUP_SCENES[pickup_index].instantiate()
+	pickup.position = player_spawn.position
+	add_child(pickup)
 
 
 func _open_doors() -> void:

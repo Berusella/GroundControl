@@ -10,6 +10,7 @@ var sprite_path: String = ""
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	_setup_sprite()
+	scale = Vector2(2, 2)
 
 
 func _setup_sprite() -> void:

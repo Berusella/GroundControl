@@ -4,9 +4,11 @@ class_name Player
 
 
 signal item_picked_up(item_data: Dictionary)
+signal player_died(collected_items: Array[Dictionary])
 
 const SPRITE_PATH = "res://Sprites/Characters/Player/player.png"
 const DEFAULT_PROJECTILE = preload("res://Scenes/Projectiles/ProjectileStandard.tscn")
+const EXPLOSION_SCENE = preload("res://Scenes/Effects/Explosion.tscn")
 const PROJECTILE_SCENES = {
 	"homing": preload("res://Scenes/Projectiles/ProjectileHoming.tscn"),
 	"bounce": preload("res://Scenes/Projectiles/ProjectileBounce.tscn"),
@@ -79,8 +81,8 @@ func _on_hitbox_area_entered(area: Area2D) -> void:
 
 
 func _setup_stats() -> void:
-	health = 10
-	max_health = 10
+	health = 5
+	max_health = 5
 	speed = 150
 	power = 3
 	is_alive = true
@@ -195,6 +197,7 @@ func die() -> void:
 		return
 
 	is_alive = false
+	player_died.emit(collected_items)
 	queue_free()
 
 
@@ -319,9 +322,15 @@ func _perform_special(special_name: String) -> void:
 
 
 func _special_big_boom() -> void:
-	# Deal 2x player damage to enemies within radius around player
+	# Deal 10x player damage to enemies within radius around player
 	var boom_radius: float = 150.0
-	var boom_damage: int = power * 2
+	var boom_damage: int = power * 10
+
+	# Spawn explosion visual
+	var explosion = EXPLOSION_SCENE.instantiate()
+	explosion.radius = boom_radius
+	explosion.global_position = global_position
+	get_tree().current_scene.add_child(explosion)
 
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var hit_count: int = 0
@@ -409,7 +418,7 @@ func _end_copy() -> void:
 
 
 func _special_pew_pew() -> void:
-	# Shoot a projectile at 1.5x damage
+	# Shoot a projectile at 1.5x damage, 3x scale
 	var shoot_direction = _get_shoot_direction()
 	if shoot_direction == Vector2.ZERO:
 		# Default to facing right if no direction input
@@ -419,6 +428,7 @@ func _special_pew_pew() -> void:
 	var spawn_offset = shoot_direction * 20.0
 	projectile.global_position = global_position + spawn_offset
 	projectile.lifetime = shot_range
+	projectile.scale = Vector2(3.0, 3.0)
 	projectile.initialize(self, shoot_direction, velocity)
 	projectile.damage = int(power * 1.5)  # Override damage to 1.5x
 	get_tree().current_scene.add_child(projectile)
