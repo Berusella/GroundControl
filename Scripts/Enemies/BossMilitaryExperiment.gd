@@ -12,8 +12,8 @@ var fire_rate: float = 2.0
 var fire_cooldown: float = 0.0
 
 # Spawning brutelings
-var spawn_timer: float = 0.0
-var spawn_interval: float = 10.0
+var bruteling_timer: float = 0.0
+var bruteling_interval: float = 10.0
 var max_spawned: int = 5
 var spawned_count: int = 0
 
@@ -54,11 +54,11 @@ func _handle_shooting(delta: float) -> void:
 
 
 func _handle_spawning(delta: float) -> void:
-	spawn_timer -= delta
+	bruteling_timer -= delta
 
-	if spawn_timer <= 0:
+	if bruteling_timer <= 0:
 		_spawn_bruteling()
-		spawn_timer = spawn_interval
+		bruteling_timer = bruteling_interval
 
 
 func _spawn_bruteling() -> void:
